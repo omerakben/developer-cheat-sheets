@@ -1044,6 +1044,1163 @@ class ResourceManager<T> {
       ],
     },
     {
+      id: "file-io-security",
+      title: "File I/O & Data Security",
+      description:
+        "Safe file operations • Browser APIs • Local storage security • Network security • Data validation",
+      examples: [
+        {
+          title: "Secure File Operations & Browser APIs",
+          description:
+            "Safe file reading • Validate file types • Size limits • Handle encoding • Prevent malicious uploads",
+          language: "typescript",
+          code: `// ✅ Safe file reading with comprehensive validation
+interface FileValidationConfig {
+  maxSizeBytes: number;
+  allowedTypes: string[];
+  allowedExtensions: string[];
+  scanForMalware?: boolean;
+}
+
+class SecureFileHandler {
+  private static readonly DEFAULT_CONFIG: FileValidationConfig = {
+    maxSizeBytes: 10 * 1024 * 1024, // 10MB
+    allowedTypes: ['image/jpeg', 'image/png', 'text/plain', 'application/pdf'],
+    allowedExtensions: ['.jpg', '.jpeg', '.png', '.txt', '.pdf'],
+    scanForMalware: true
+  };
+
+  static async validateAndReadFile(
+    file: File,
+    config: Partial<FileValidationConfig> = {}
+  ): Promise<{ success: true; data: string | ArrayBuffer } | { success: false; error: string }> {
+    const fullConfig = { ...this.DEFAULT_CONFIG, ...config };
+
+    // 🔒 SECURITY: Validate file size to prevent DoS
+    if (file.size > fullConfig.maxSizeBytes) {
+      return {
+        success: false,
+        error: \`File too large: \${file.size} bytes (max: \${fullConfig.maxSizeBytes})\`
+      };
+    }
+
+    // 🔒 SECURITY: Validate file type
+    if (!fullConfig.allowedTypes.includes(file.type)) {
+      return {
+        success: false,
+        error: \`Invalid file type: \${file.type}\`
+      };
+    }
+
+    // 🔒 SECURITY: Validate file extension
+    const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    if (!fullConfig.allowedExtensions.includes(extension)) {
+      return {
+        success: false,
+        error: \`Invalid file extension: \${extension}\`
+      };
+    }
+
+    // 🔒 SECURITY: Check for suspicious file names
+    if (this.hasSuspiciousName(file.name)) {
+      return {
+        success: false,
+        error: "Suspicious file name detected"
+      };
+    }
+
+    try {
+      const data = await this.readFileContent(file);
+      
+      // Additional content validation for text files
+      if (file.type.startsWith('text/') && typeof data === 'string') {
+        if (this.hasUnsafeContent(data)) {
+          return {
+            success: false,
+            error: "File contains unsafe content"
+          };
+        }
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to read file"
+      };
+    }
+  }
+
+  private static hasSuspiciousName(filename: string): boolean {
+    const suspiciousPatterns = [
+      /\\.exe$/i, /\\.bat$/i, /\\.cmd$/i, /\\.scr$/i,
+      /\\.vbs$/i, /\\.js$/i, /\\.jar$/i, /\\.php$/i,
+      /\\.\\./, // Double dots
+      /<script/i, // Script tags in filename
+    ];
+    return suspiciousPatterns.some(pattern => pattern.test(filename));
+  }
+
+  private static hasUnsafeContent(content: string): boolean {
+    const unsafePatterns = [
+      /<script[^>]*>/i,
+      /javascript:/i,
+      /data:text\\/html/i,
+      /vbscript:/i,
+      /on\\w+\\s*=/i, // Event handlers
+    ];
+    return unsafePatterns.some(pattern => pattern.test(content));
+  }
+
+  private static async readFileContent(file: File): Promise<string | ArrayBuffer> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          resolve(event.target.result);
+        } else {
+          reject(new Error("Failed to read file"));
+        }
+      };
+      
+      reader.onerror = () => reject(new Error("File reading error"));
+      
+      // Read as text for text files, as array buffer for binary
+      if (file.type.startsWith('text/')) {
+        reader.readAsText(file);
+      } else {
+        reader.readAsArrayBuffer(file);
+      }
+    });
+  }
+}
+
+// ✅ Usage example
+async function handleFileUpload(fileInput: HTMLInputElement): Promise<void> {
+  const files = fileInput.files;
+  if (!files || files.length === 0) return;
+
+  for (const file of Array.from(files)) {
+    const result = await SecureFileHandler.validateAndReadFile(file, {
+      maxSizeBytes: 5 * 1024 * 1024, // 5MB limit
+      allowedTypes: ['image/jpeg', 'image/png']
+    });
+
+    if (result.success) {
+      console.log("File processed successfully:", file.name);
+      // Process the file data safely
+    } else {
+      console.error("File validation failed:", result.error);
+      // Show error to user
+    }
+  }
+}
+
+// 💡 SECURITY BEST PRACTICES:
+// - Always validate file size, type, and extension to prevent malicious uploads
+// - Scan file content for suspicious patterns before processing
+// - Use Content Security Policy headers to prevent XSS through uploaded files
+// - Store uploaded files outside web root with randomized names
+// - Implement virus scanning for production applications`,
+        },
+        {
+          title: "Secure Local Storage & Session Management",
+          description:
+            "Safe data persistence • Encrypt sensitive data • Validate stored data • Handle storage quota",
+          language: "typescript",
+          code: `// 🔒 Secure storage wrapper with encryption and validation
+interface StorageItem<T> {
+  data: T;
+  timestamp: number;
+  expiry?: number;
+  encrypted?: boolean;
+}
+
+class SecureStorage {
+  private static readonly PREFIX = 'app_';
+  private static readonly ENCRYPTION_KEY = 'your-secret-key'; // Use proper key management!
+
+  // ✅ Store data securely with expiration
+  static setItem<T>(
+    key: string,
+    value: T,
+    options: {
+      expiryHours?: number;
+      encrypt?: boolean;
+      validateOnRead?: (data: T) => boolean;
+    } = {}
+  ): boolean {
+    try {
+      const item: StorageItem<T> = {
+        data: value,
+        timestamp: Date.now(),
+        encrypted: options.encrypt,
+      };
+
+      if (options.expiryHours) {
+        item.expiry = Date.now() + (options.expiryHours * 60 * 60 * 1000);
+      }
+
+      let serialized = JSON.stringify(item);
+      
+      // 🔒 SECURITY: Encrypt sensitive data
+      if (options.encrypt) {
+        serialized = this.encrypt(serialized);
+      }
+
+      const storageKey = this.PREFIX + key;
+      localStorage.setItem(storageKey, serialized);
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to store item:', error);
+      return false;
+    }
+  }
+
+  // ✅ Retrieve data with validation and expiry check
+  static getItem<T>(
+    key: string,
+    validator?: (data: unknown) => data is T
+  ): T | null {
+    try {
+      const storageKey = this.PREFIX + key;
+      let stored = localStorage.getItem(storageKey);
+      
+      if (!stored) return null;
+
+      // Decrypt if needed (detect encryption by trying to parse)
+      try {
+        JSON.parse(stored);
+      } catch {
+        // Likely encrypted, try to decrypt
+        stored = this.decrypt(stored);
+      }
+
+      const item: StorageItem<T> = JSON.parse(stored);
+
+      // Check expiry
+      if (item.expiry && Date.now() > item.expiry) {
+        this.removeItem(key);
+        return null;
+      }
+
+      // Validate data if validator provided
+      if (validator && !validator(item.data)) {
+        console.warn(\`Invalid data found for key: \${key}\`);
+        this.removeItem(key);
+        return null;
+      }
+
+      return item.data;
+    } catch (error) {
+      console.error('Failed to retrieve item:', error);
+      return null;
+    }
+  }
+
+  // ✅ Safe removal
+  static removeItem(key: string): void {
+    const storageKey = this.PREFIX + key;
+    localStorage.removeItem(storageKey);
+  }
+
+  // ✅ Clear all app data
+  static clearAll(): void {
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith(this.PREFIX)) {
+        localStorage.removeItem(key);
+      }
+    });
+  }
+
+  // ✅ Check storage quota
+  static getStorageInfo(): { used: number; available: number; percentage: number } {
+    try {
+      const test = 'test';
+      const total = 1024 * 1024 * 5; // Approximate 5MB limit
+      let used = 0;
+
+      // Calculate used space
+      for (const key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+          used += localStorage[key].length + key.length;
+        }
+      }
+
+      return {
+        used,
+        available: total - used,
+        percentage: (used / total) * 100
+      };
+    } catch {
+      return { used: 0, available: 0, percentage: 0 };
+    }
+  }
+
+  // 🔒 Simple encryption (use crypto-js or Web Crypto API in production)
+  private static encrypt(text: string): string {
+    // This is a simple XOR cipher for demo - use proper encryption in production!
+    return btoa(text.split('').map((char, i) => 
+      String.fromCharCode(char.charCodeAt(0) ^ this.ENCRYPTION_KEY.charCodeAt(i % this.ENCRYPTION_KEY.length))
+    ).join(''));
+  }
+
+  private static decrypt(encrypted: string): string {
+    const decoded = atob(encrypted);
+    return decoded.split('').map((char, i) => 
+      String.fromCharCode(char.charCodeAt(0) ^ this.ENCRYPTION_KEY.charCodeAt(i % this.ENCRYPTION_KEY.length))
+    ).join('');
+  }
+}
+
+// ✅ Type-safe user session management
+interface UserSession {
+  userId: number;
+  username: string;
+  role: 'admin' | 'user' | 'guest';
+  loginTime: number;
+  lastActivity: number;
+}
+
+class SessionManager {
+  private static readonly SESSION_KEY = 'user_session';
+  private static readonly SESSION_TIMEOUT_HOURS = 8;
+
+  static createSession(user: Omit<UserSession, 'loginTime' | 'lastActivity'>): boolean {
+    const session: UserSession = {
+      ...user,
+      loginTime: Date.now(),
+      lastActivity: Date.now()
+    };
+
+    return SecureStorage.setItem(this.SESSION_KEY, session, {
+      expiryHours: this.SESSION_TIMEOUT_HOURS,
+      encrypt: true
+    });
+  }
+
+  static getSession(): UserSession | null {
+    return SecureStorage.getItem(this.SESSION_KEY, this.isValidSession);
+  }
+
+  static updateActivity(): void {
+    const session = this.getSession();
+    if (session) {
+      session.lastActivity = Date.now();
+      SecureStorage.setItem(this.SESSION_KEY, session, {
+        expiryHours: this.SESSION_TIMEOUT_HOURS,
+        encrypt: true
+      });
+    }
+  }
+
+  static logout(): void {
+    SecureStorage.removeItem(this.SESSION_KEY);
+    // Clear other sensitive data
+    SecureStorage.clearAll();
+  }
+
+  private static isValidSession(data: unknown): data is UserSession {
+    return typeof data === 'object' && 
+           data !== null &&
+           typeof (data as UserSession).userId === 'number' &&
+           typeof (data as UserSession).username === 'string' &&
+           ['admin', 'user', 'guest'].includes((data as UserSession).role);
+  }
+}
+
+// 💡 STORAGE SECURITY BEST PRACTICES:
+// - Never store sensitive data (passwords, tokens) in localStorage without encryption
+// - Always validate data when reading from storage to prevent injection attacks
+// - Implement expiration for all stored data to limit exposure window
+// - Monitor storage quota to prevent denial of service
+// - Clear sensitive data on logout and use secure session management`,
+        },
+        {
+          title: "Network Security & API Communication",
+          description:
+            "Secure HTTP requests • Request validation • Error handling • Rate limiting • CSRF protection",
+          language: "typescript",
+          code: `// ✅ Secure HTTP client with comprehensive protection
+interface RequestConfig {
+  timeout?: number;
+  retries?: number;
+  validateResponse?: boolean;
+  includeCredentials?: boolean;
+  csrfToken?: string;
+}
+
+interface ApiError {
+  code: string;
+  message: string;
+  status: number;
+  timestamp: Date;
+}
+
+class SecureHttpClient {
+  private static readonly DEFAULT_TIMEOUT = 10000;
+  private static readonly BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+  private static readonly REQUEST_COUNTER = new Map<string, number>();
+
+  // ✅ Rate limiting per endpoint
+  private static checkRateLimit(endpoint: string): boolean {
+    const now = Date.now();
+    const key = \`\${endpoint}_\${Math.floor(now / 60000)}\`; // Per minute window
+    const count = this.REQUEST_COUNTER.get(key) || 0;
+    
+    if (count >= 100) { // 100 requests per minute limit
+      console.warn(\`Rate limit exceeded for endpoint: \${endpoint}\`);
+      return false;
+    }
+    
+    this.REQUEST_COUNTER.set(key, count + 1);
+    return true;
+  }
+
+  // ✅ Secure request wrapper
+  static async request<T>(
+    endpoint: string,
+    options: RequestInit & RequestConfig = {}
+  ): Promise<Result<T, ApiError>> {
+    // 🔒 SECURITY: Rate limiting
+    if (!this.checkRateLimit(endpoint)) {
+      return createError({
+        code: 'RATE_LIMITED',
+        message: 'Too many requests',
+        status: 429,
+        timestamp: new Date()
+      });
+    }
+
+    // 🔒 SECURITY: Validate URL to prevent SSRF
+    if (!this.isValidEndpoint(endpoint)) {
+      return createError({
+        code: 'INVALID_ENDPOINT',
+        message: 'Invalid endpoint URL',
+        status: 400,
+        timestamp: new Date()
+      });
+    }
+
+    const {
+      timeout = this.DEFAULT_TIMEOUT,
+      retries = 3,
+      validateResponse = true,
+      includeCredentials = false,
+      csrfToken,
+      ...fetchOptions
+    } = options;
+
+    // ✅ Build secure headers
+    const headers = new Headers({
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest', // CSRF protection
+      ...((fetchOptions.headers as Record<string, string>) || {})
+    });
+
+    // 🔒 SECURITY: Add CSRF token
+    if (csrfToken) {
+      headers.set('X-CSRF-Token', csrfToken);
+    }
+
+    // 🔒 SECURITY: Add security headers
+    headers.set('X-Content-Type-Options', 'nosniff');
+    
+    const requestOptions: RequestInit = {
+      ...fetchOptions,
+      headers,
+      credentials: includeCredentials ? 'include' : 'same-origin',
+    };
+
+    // ✅ Implement retry logic with exponential backoff
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+        
+        const response = await fetch(\`\${this.BASE_URL}\${endpoint}\`, {
+          ...requestOptions,
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        // ✅ Validate response
+        if (!response.ok) {
+          const errorData = await this.parseErrorResponse(response);
+          return createError(errorData);
+        }
+
+        // 🔒 SECURITY: Validate content type
+        const contentType = response.headers.get('content-type');
+        if (validateResponse && contentType && !contentType.includes('application/json')) {
+          return createError({
+            code: 'INVALID_CONTENT_TYPE',
+            message: \`Expected JSON, got \${contentType}\`,
+            status: response.status,
+            timestamp: new Date()
+          });
+        }
+
+        const data = await response.json();
+        
+        // ✅ Validate response structure
+        if (validateResponse && !this.isValidResponse(data)) {
+          return createError({
+            code: 'INVALID_RESPONSE',
+            message: 'Response validation failed',
+            status: 422,
+            timestamp: new Date()
+          });
+        }
+
+        return createResult(data);
+
+      } catch (error) {
+        if (attempt === retries) {
+          return createError({
+            code: 'NETWORK_ERROR',
+            message: error instanceof Error ? error.message : 'Network request failed',
+            status: 0,
+            timestamp: new Date()
+          });
+        }
+
+        // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      }
+    }
+
+    return createError({
+      code: 'MAX_RETRIES_EXCEEDED',
+      message: 'Request failed after maximum retries',
+      status: 0,
+      timestamp: new Date()
+    });
+  }
+
+  // ✅ Type-safe API methods
+  static async get<T>(endpoint: string, config?: RequestConfig): Promise<Result<T, ApiError>> {
+    return this.request<T>(endpoint, { method: 'GET', ...config });
+  }
+
+  static async post<T>(
+    endpoint: string, 
+    data: unknown, 
+    config?: RequestConfig
+  ): Promise<Result<T, ApiError>> {
+    return this.request<T>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      ...config
+    });
+  }
+
+  static async put<T>(
+    endpoint: string, 
+    data: unknown, 
+    config?: RequestConfig
+  ): Promise<Result<T, ApiError>> {
+    return this.request<T>(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      ...config
+    });
+  }
+
+  static async delete<T>(endpoint: string, config?: RequestConfig): Promise<Result<T, ApiError>> {
+    return this.request<T>(endpoint, { method: 'DELETE', ...config });
+  }
+
+  // 🔒 Validate endpoint to prevent SSRF attacks
+  private static isValidEndpoint(endpoint: string): boolean {
+    // Only allow relative URLs or whitelisted domains
+    if (endpoint.startsWith('/')) return true;
+    
+    const allowedDomains = [
+      'api.yourdomain.com',
+      'secure-api.yourdomain.com'
+    ];
+    
+    try {
+      const url = new URL(endpoint);
+      return allowedDomains.includes(url.hostname);
+    } catch {
+      return false;
+    }
+  }
+
+  private static async parseErrorResponse(response: Response): Promise<ApiError> {
+    try {
+      const errorData = await response.json();
+      return {
+        code: errorData.code || 'UNKNOWN_ERROR',
+        message: errorData.message || response.statusText,
+        status: response.status,
+        timestamp: new Date()
+      };
+    } catch {
+      return {
+        code: 'PARSE_ERROR',
+        message: response.statusText || 'Unknown error',
+        status: response.status,
+        timestamp: new Date()
+      };
+    }
+  }
+
+  private static isValidResponse(data: unknown): boolean {
+    // Basic validation - implement according to your API schema
+    return typeof data === 'object' && data !== null;
+  }
+}
+
+// ✅ Usage example with proper error handling
+async function fetchUserProfile(userId: number): Promise<UserSession | null> {
+  const result = await SecureHttpClient.get<UserSession>(\`/api/users/\${userId}\`, {
+    timeout: 5000,
+    validateResponse: true,
+    includeCredentials: true
+  });
+
+  if (result.success) {
+    return result.data;
+  } else {
+    console.error('Failed to fetch user profile:', {
+      code: result.error.code,
+      message: result.error.message,
+      status: result.error.status
+    });
+    return null;
+  }
+}
+
+// 💡 NETWORK SECURITY BEST PRACTICES:
+// - Implement rate limiting to prevent abuse and DoS attacks
+// - Validate all endpoints to prevent SSRF (Server-Side Request Forgery)
+// - Use CSRF tokens for state-changing operations
+// - Set secure headers to prevent common attacks (XSS, clickjacking)
+// - Always validate response content and structure before processing
+// - Implement proper error handling without exposing sensitive information`,
+        },
+      ],
+    },
+    {
+      id: "performance-optimization",
+      title: "Performance & Memory Optimization",
+      description:
+        "Optimize bundle size • Lazy loading • Memory management • Efficient algorithms • Type-only imports",
+      examples: [
+        {
+          title: "Bundle Optimization & Code Splitting",
+          description:
+            "Reduce bundle size • Tree shaking • Dynamic imports • Type-only imports • Lazy loading patterns",
+          language: "typescript",
+          code: `// ⚡ Type-only imports for better tree shaking
+import type { User, ApiResponse } from './types/user';
+import type { ComponentProps } from 'react';
+
+// Only import the actual implementation when needed
+const loadUserModule = () => import('./modules/user');
+const loadChartComponent = () => import('./components/Chart');
+
+// ✅ Lazy-loaded type-safe modules
+interface LazyModule<T> {
+  load(): Promise<T>;
+  isLoaded(): boolean;
+  get(): T | null;
+}
+
+class LazyModuleLoader<T> implements LazyModule<T> {
+  private module: T | null = null;
+  private loading: Promise<T> | null = null;
+  
+  constructor(private loader: () => Promise<{ default: T } | T>) {}
+  
+  async load(): Promise<T> {
+    if (this.module) {
+      return this.module;
+    }
+    
+    if (!this.loading) {
+      this.loading = this.loader().then(mod => {
+        // Handle both default exports and direct exports
+        const loadedModule = 'default' in mod ? mod.default : mod;
+        this.module = loadedModule;
+        this.loading = null;
+        return loadedModule;
+      });
+    }
+    
+    return this.loading;
+  }
+  
+  isLoaded(): boolean {
+    return this.module !== null;
+  }
+  
+  get(): T | null {
+    return this.module;
+  }
+}
+
+// ✅ Smart component lazy loading
+interface LazyComponentProps<T> {
+  loader: () => Promise<{ default: React.ComponentType<T> }>;
+  fallback?: React.ComponentNode;
+  props: T;
+}
+
+function LazyComponent<T>({ loader, fallback, props }: LazyComponentProps<T>) {
+  const [Component, setComponent] = React.useState<React.ComponentType<T> | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    loader()
+      .then(({ default: LoadedComponent }) => {
+        setComponent(() => LoadedComponent);
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : 'Failed to load component');
+      });
+  }, [loader]);
+
+  if (error) {
+    return <div>Error loading component: {error}</div>;
+  }
+
+  if (!Component) {
+    return fallback || <div>Loading...</div>;
+  }
+
+  return <Component {...props} />;
+}
+
+// ✅ Bundle analyzer utility
+interface BundleAnalysis {
+  totalSize: number;
+  gzippedSize: number;
+  modules: Array<{ name: string; size: number; }>;
+  duplicates: string[];
+}
+
+class BundleOptimizer {
+  // ✅ Detect unused exports (for build-time analysis)
+  static analyzeImports(sourceCode: string): {
+    imports: string[];
+    unusedImports: string[];
+    typeOnlyImports: string[];
+  } {
+    const importRegex = /import\\s+(?:{([^}]+)}|([\\w*]+))\\s+from\\s+['"]([^'"]+)['"]/g;
+    const typeImportRegex = /import\\s+type\\s+{([^}]+)}\\s+from\\s+['"]([^'"]+)['"]/g;
+    
+    const imports: string[] = [];
+    const typeOnlyImports: string[] = [];
+    let match;
+
+    // Find type-only imports
+    while ((match = typeImportRegex.exec(sourceCode)) !== null) {
+      typeOnlyImports.push(...match[1].split(',').map(s => s.trim()));
+    }
+
+    // Find regular imports
+    while ((match = importRegex.exec(sourceCode)) !== null) {
+      if (match[1]) {
+        imports.push(...match[1].split(',').map(s => s.trim()));
+      } else if (match[2]) {
+        imports.push(match[2]);
+      }
+    }
+
+    const unusedImports = imports.filter(imp => {
+      // Simple check if import name appears elsewhere in code
+      const count = sourceCode.split(imp).length - 1;
+      return count <= 1; // Only appears once (in import)
+    });
+
+    return { imports, unusedImports, typeOnlyImports };
+  }
+
+  // ✅ Dynamic import with preloading
+  static createPreloadableImport<T>(
+    loader: () => Promise<T>,
+    preloadCondition?: () => boolean
+  ) {
+    let preloaded: Promise<T> | null = null;
+
+    return {
+      preload(): Promise<T> {
+        if (!preloaded) {
+          preloaded = loader();
+        }
+        return preloaded;
+      },
+
+      load(): Promise<T> {
+        if (preloaded) {
+          return preloaded;
+        }
+        return loader();
+      },
+
+      autoPreload(): void {
+        if (preloadCondition && preloadCondition()) {
+          this.preload();
+        }
+      }
+    };
+  }
+}
+
+// ✅ Webpack bundle splitting optimization hints
+/* webpack/tsconfig.json configuration:
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": false,
+    "noEmit": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true // Preserves type-only imports
+  }
+}
+
+// webpack.config.js optimization:
+{
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        vendor: {
+          test: /[\\\\/]node_modules[\\\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+        },
+        common: {
+          name: 'common',
+          minChunks: 2,
+          chunks: 'all',
+          enforce: true
+        }
+      }
+    },
+    usedExports: true, // Enable tree shaking
+    sideEffects: false, // Mark package as side-effect free
+  }
+}
+*/
+
+// 💡 BUNDLE OPTIMIZATION STRATEGIES:
+// - Use "type" imports exclusively for types to enable better tree shaking
+// - Implement dynamic imports for large components and libraries
+// - Preload critical modules during idle time to improve perceived performance
+// - Analyze bundle composition regularly to identify optimization opportunities
+// - Configure webpack/bundler properly for optimal code splitting and tree shaking`,
+        },
+        {
+          title: "Memory Management & Efficient Data Structures",
+          description:
+            "Prevent memory leaks • Optimize collections • Weak references • Object pooling • Garbage collection awareness",
+          language: "typescript",
+          code: `// ✅ Memory-efficient data structures
+class LRUCache<K, V> {
+  private cache = new Map<K, V>();
+  private maxSize: number;
+  
+  constructor(maxSize: number = 100) {
+    this.maxSize = maxSize;
+  }
+  
+  get(key: K): V | undefined {
+    if (this.cache.has(key)) {
+      // Move to end (most recently used)
+      const value = this.cache.get(key)!;
+      this.cache.delete(key);
+      this.cache.set(key, value);
+      return value;
+    }
+    return undefined;
+  }
+  
+  set(key: K, value: V): void {
+    if (this.cache.has(key)) {
+      this.cache.delete(key);
+    } else if (this.cache.size >= this.maxSize) {
+      // Remove least recently used (first item)
+      const firstKey = this.cache.keys().next().value;
+      this.cache.delete(firstKey);
+    }
+    
+    this.cache.set(key, value);
+  }
+  
+  clear(): void {
+    this.cache.clear();
+  }
+  
+  size(): number {
+    return this.cache.size;
+  }
+  
+  // ⚡ Memory usage estimation
+  getMemoryUsage(): number {
+    let size = 0;
+    for (const [key, value] of this.cache) {
+      size += this.estimateSize(key) + this.estimateSize(value);
+    }
+    return size;
+  }
+  
+  private estimateSize(obj: unknown): number {
+    if (typeof obj === 'string') return obj.length * 2; // UTF-16
+    if (typeof obj === 'number') return 8;
+    if (typeof obj === 'boolean') return 1;
+    if (obj === null || obj === undefined) return 0;
+    if (typeof obj === 'object') {
+      return JSON.stringify(obj).length * 2; // Rough estimate
+    }
+    return 0;
+  }
+}
+
+// ✅ Weak references for memory management
+class WeakCache<T extends object, V> {
+  private cache = new WeakMap<T, V>();
+  
+  get(key: T): V | undefined {
+    return this.cache.get(key);
+  }
+  
+  set(key: T, value: V): void {
+    this.cache.set(key, value);
+  }
+  
+  has(key: T): boolean {
+    return this.cache.has(key);
+  }
+  
+  delete(key: T): boolean {
+    return this.cache.delete(key);
+  }
+}
+
+// ✅ Object pooling for frequent allocations
+class ObjectPool<T> {
+  private pool: T[] = [];
+  private createFn: () => T;
+  private resetFn: (obj: T) => void;
+  private maxSize: number;
+  
+  constructor(
+    createFn: () => T,
+    resetFn: (obj: T) => void,
+    initialSize: number = 10,
+    maxSize: number = 100
+  ) {
+    this.createFn = createFn;
+    this.resetFn = resetFn;
+    this.maxSize = maxSize;
+    
+    // Pre-populate pool
+    for (let i = 0; i < initialSize; i++) {
+      this.pool.push(createFn());
+    }
+  }
+  
+  acquire(): T {
+    const obj = this.pool.pop();
+    return obj || this.createFn();
+  }
+  
+  release(obj: T): void {
+    if (this.pool.length < this.maxSize) {
+      this.resetFn(obj);
+      this.pool.push(obj);
+    }
+    // If pool is full, let object be garbage collected
+  }
+  
+  size(): number {
+    return this.pool.length;
+  }
+  
+  clear(): void {
+    this.pool.length = 0;
+  }
+}
+
+// ✅ Memory leak detection and prevention
+class MemoryLeakDetector {
+  private static readonly observers = new Set<() => void>();
+  private static readonly timers = new Set<number>();
+  private static readonly intervals = new Set<number>();
+  
+  // Track event listeners for cleanup
+  static addEventListener<K extends keyof DocumentEventMap>(
+    element: Document | Element,
+    type: K,
+    listener: (event: DocumentEventMap[K]) => void,
+    options?: boolean | AddEventListenerOptions
+  ): () => void {
+    element.addEventListener(type, listener, options);
+    
+    const cleanup = () => {
+      element.removeEventListener(type, listener, options);
+    };
+    
+    this.observers.add(cleanup);
+    return cleanup;
+  }
+  
+  // Track timers for cleanup
+  static setTimeout(callback: () => void, delay: number): number {
+    const id = window.setTimeout(() => {
+      this.timers.delete(id);
+      callback();
+    }, delay);
+    
+    this.timers.add(id);
+    return id;
+  }
+  
+  static setInterval(callback: () => void, delay: number): number {
+    const id = window.setInterval(callback, delay);
+    this.intervals.add(id);
+    return id;
+  }
+  
+  static clearTimeout(id: number): void {
+    window.clearTimeout(id);
+    this.timers.delete(id);
+  }
+  
+  static clearInterval(id: number): void {
+    window.clearInterval(id);
+    this.intervals.delete(id);
+  }
+  
+  // Clean up all tracked resources
+  static cleanup(): void {
+    // Clear all observers
+    this.observers.forEach(cleanup => cleanup());
+    this.observers.clear();
+    
+    // Clear all timers
+    this.timers.forEach(id => window.clearTimeout(id));
+    this.timers.clear();
+    
+    // Clear all intervals
+    this.intervals.forEach(id => window.clearInterval(id));
+    this.intervals.clear();
+  }
+  
+  // Memory usage monitoring
+  static getMemoryInfo(): {
+    usedJSHeapSize: number;
+    totalJSHeapSize: number;
+    jsHeapSizeLimit: number;
+  } | null {
+    if ('memory' in performance) {
+      const memory = (performance as any).memory;
+      return {
+        usedJSHeapSize: memory.usedJSHeapSize,
+        totalJSHeapSize: memory.totalJSHeapSize,
+        jsHeapSizeLimit: memory.jsHeapSizeLimit
+      };
+    }
+    return null;
+  }
+}
+
+// ✅ Optimized collection operations
+class OptimizedArray<T> {
+  private items: T[] = [];
+  private indices = new Map<T, number>();
+  
+  add(item: T): void {
+    if (!this.indices.has(item)) {
+      const index = this.items.length;
+      this.items.push(item);
+      this.indices.set(item, index);
+    }
+  }
+  
+  remove(item: T): boolean {
+    const index = this.indices.get(item);
+    if (index === undefined) return false;
+    
+    // Swap with last element and pop (O(1) removal)
+    const lastItem = this.items[this.items.length - 1];
+    this.items[index] = lastItem;
+    this.indices.set(lastItem, index);
+    
+    this.items.pop();
+    this.indices.delete(item);
+    return true;
+  }
+  
+  has(item: T): boolean {
+    return this.indices.has(item);
+  }
+  
+  toArray(): readonly T[] {
+    return this.items;
+  }
+  
+  clear(): void {
+    this.items.length = 0;
+    this.indices.clear();
+  }
+}
+
+// ✅ React component memory optimization
+interface ComponentCleanup {
+  cleanup(): void;
+}
+
+function useMemoryOptimization(): ComponentCleanup {
+  const cleanupFunctions = React.useRef<(() => void)[]>([]);
+  
+  const addCleanup = React.useCallback((fn: () => void) => {
+    cleanupFunctions.current.push(fn);
+  }, []);
+  
+  const cleanup = React.useCallback(() => {
+    cleanupFunctions.current.forEach(fn => fn());
+    cleanupFunctions.current = [];
+  }, []);
+  
+  React.useEffect(() => {
+    return cleanup; // Cleanup on unmount
+  }, [cleanup]);
+  
+  return { cleanup };
+}
+
+// Usage examples
+const stringPool = new ObjectPool(
+  () => '', // Create empty string
+  (str) => { /* Reset string if needed */ }, // Reset function
+  20, // Initial pool size
+  100 // Max pool size
+);
+
+const userCache = new LRUCache<number, User>(50);
+const componentCache = new WeakCache<HTMLElement, ComponentData>();
+
+// 💡 MEMORY OPTIMIZATION STRATEGIES:
+// - Use LRU cache for frequently accessed data with size limits
+// - Implement object pooling for frequently created/destroyed objects
+// - Use WeakMap/WeakSet for object associations that shouldn't prevent garbage collection
+// - Track and clean up event listeners, timers, and other resources in React components
+// - Monitor memory usage in development to identify and fix memory leaks early`,
+        },
+      ],
+    },
+    {
       id: "advanced-patterns",
       title: "Advanced TypeScript Patterns",
       description:
@@ -1188,196 +2345,6 @@ const userQuery = new QueryBuilder<User>()
 // - Template literals for type-safe string operations and domain-specific languages
 // - Builder pattern for complex object construction with method chaining
 // - Event systems with strict payload typing for type-safe communication`,
-        },
-        {
-          title: "Performance & Memory Optimization",
-          description:
-            "Optimize bundle size • Lazy loading • Memory management • Type-only imports",
-          language: "typescript",
-          code: `// ⚡ Type-only imports for better tree shaking
-import type { User } from './types/user';
-import type { ApiResponse } from './types/api';
-
-// Only import the actual implementation when needed
-const loadUserModule = () => import('./modules/user');
-
-// ✅ Lazy-loaded type-safe modules
-interface LazyModule<T> {
-  load(): Promise<T>;
-  isLoaded(): boolean;
-  get(): T | null;
-}
-
-class LazyModuleLoader<T> implements LazyModule<T> {
-  private module: T | null = null;
-  private loading: Promise<T> | null = null;
-  
-  constructor(private loader: () => Promise<T>) {}
-  
-  async load(): Promise<T> {
-    if (this.module) {
-      return this.module;
-    }
-    
-    if (!this.loading) {
-      this.loading = this.loader().then(mod => {
-        this.module = mod;
-        this.loading = null;
-        return mod;
-      });
-    }
-    
-    return this.loading;
-  }
-  
-  isLoaded(): boolean {
-    return this.module !== null;
-  }
-  
-  get(): T | null {
-    return this.module;
-  }
-}
-
-// ✅ Memory-efficient data structures
-class LRUCache<K, V> {
-  private cache = new Map<K, V>();
-  private maxSize: number;
-  
-  constructor(maxSize: number = 100) {
-    this.maxSize = maxSize;
-  }
-  
-  get(key: K): V | undefined {
-    if (this.cache.has(key)) {
-      // Move to end (most recently used)
-      const value = this.cache.get(key)!;
-      this.cache.delete(key);
-      this.cache.set(key, value);
-      return value;
-    }
-    return undefined;
-  }
-  
-  set(key: K, value: V): void {
-    if (this.cache.has(key)) {
-      this.cache.delete(key);
-    } else if (this.cache.size >= this.maxSize) {
-      // Remove least recently used (first item)
-      const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
-    }
-    
-    this.cache.set(key, value);
-  }
-  
-  clear(): void {
-    this.cache.clear();
-  }
-  
-  size(): number {
-    return this.cache.size;
-  }
-}
-
-// ✅ Weak references for memory management
-class WeakCache<T extends object, V> {
-  private cache = new WeakMap<T, V>();
-  
-  get(key: T): V | undefined {
-    return this.cache.get(key);
-  }
-  
-  set(key: T, value: V): void {
-    this.cache.set(key, value);
-  }
-  
-  has(key: T): boolean {
-    return this.cache.has(key);
-  }
-  
-  delete(key: T): boolean {
-    return this.cache.delete(key);
-  }
-}
-
-// ✅ Object pooling for frequent allocations
-class ObjectPool<T> {
-  private pool: T[] = [];
-  private createFn: () => T;
-  private resetFn: (obj: T) => void;
-  
-  constructor(
-    createFn: () => T,
-    resetFn: (obj: T) => void,
-    initialSize: number = 10
-  ) {
-    this.createFn = createFn;
-    this.resetFn = resetFn;
-    
-    // Pre-populate pool
-    for (let i = 0; i < initialSize; i++) {
-      this.pool.push(createFn());
-    }
-  }
-  
-  acquire(): T {
-    const obj = this.pool.pop();
-    return obj || this.createFn();
-  }
-  
-  release(obj: T): void {
-    this.resetFn(obj);
-    this.pool.push(obj);
-  }
-  
-  size(): number {
-    return this.pool.size;
-  }
-}
-
-// ✅ Optimized collection operations
-class OptimizedArray<T> {
-  private items: T[] = [];
-  private indices = new Map<T, number>();
-  
-  add(item: T): void {
-    if (!this.indices.has(item)) {
-      const index = this.items.length;
-      this.items.push(item);
-      this.indices.set(item, index);
-    }
-  }
-  
-  remove(item: T): boolean {
-    const index = this.indices.get(item);
-    if (index === undefined) return false;
-    
-    // Swap with last element and pop
-    const lastItem = this.items[this.items.length - 1];
-    this.items[index] = lastItem;
-    this.indices.set(lastItem, index);
-    
-    this.items.pop();
-    this.indices.delete(item);
-    return true;
-  }
-  
-  has(item: T): boolean {
-    return this.indices.has(item);
-  }
-  
-  toArray(): readonly T[] {
-    return this.items;
-  }
-}
-
-// 💡 PERFORMANCE OPTIMIZATION:
-// - Use type-only imports to reduce bundle size and improve build times
-// - Implement lazy loading for large modules to improve initial load performance
-// - Use appropriate caching strategies (LRU, Weak) based on memory constraints
-// - Consider object pooling for frequent allocations in performance-critical code
-// - Optimize collection operations for your specific use case and data patterns`,
         },
       ],
     },

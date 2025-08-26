@@ -73,7 +73,7 @@ export default function CheatSheetLayout({
       <div className="max-w-7xl mx-auto px-4 py-8 flex gap-8">
         {/* Sidebar Navigation */}
         <div className="hidden lg:block w-64 flex-shrink-0">
-          <div className="sticky top-32">
+          <div className="sticky top-40">
             <h2 className="text-lg font-semibold text-white mb-4">Sections</h2>
             <nav className="space-y-2">
               {filteredSections.map((section) => (

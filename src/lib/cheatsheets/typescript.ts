@@ -3,44 +3,533 @@ import { CheatSheet } from "@/types/cheatsheet";
 export const typescriptCheatSheet: CheatSheet = {
   title: "TypeScript Cheat Sheet",
   description:
-    "Modern TypeScript with React integration, type safety, and best practices",
+    "Strategic TypeScript guide • Security-first approach • Type safety • Performance patterns • Best practices",
   sections: [
     {
-      id: "basics",
-      title: "TypeScript Basics",
+      id: "security-validation",
+      title: "Security & Input Validation",
       description:
-        "Core types, interfaces, and fundamental TypeScript concepts",
+        "Type safety as security • Input validation patterns • Prevent runtime errors • Secure API handling",
       examples: [
         {
-          title: "Basic Types",
-          description: "TypeScript's built-in types and type annotations",
+          title: "Type-Safe Input Validation",
+          description:
+            "Use TypeScript types for validation • Prevent injection attacks • Validate external data • Runtime type checking",
           language: "typescript",
-          code: `// Primitive types
-let name: string = "TypeScript";
-let age: number = 5;
-let isActive: boolean = true;
-let items: number[] = [1, 2, 3];
-let scores: Array<number> = [95, 87, 92];
+          code: `// 🔒 SECURITY: Type-safe input validation
+// Type guards for runtime validation
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
 
-// Union types
-let id: string | number = "user-123";
-id = 456; // Also valid
+function isValidEmail(value: unknown): value is string {
+  if (!isString(value)) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
 
-// Literal types
-let status: "loading" | "success" | "error" = "loading";
-let size: "small" | "medium" | "large" = "medium";
+function isValidUserId(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value > 0;
+}
 
-// Any and unknown
-let data: any = "could be anything";
-let userInput: unknown = "safe unknown type";
+// ✅ Secure user input validation
+interface UserInput {
+  name: string;
+  email: string;
+  age: number;
+}
 
-// Null and undefined
-let optional: string | null = null;
-let maybe: string | undefined = undefined;
+function validateUserInput(input: unknown): UserInput | null {
+  if (!input || typeof input !== "object") {
+    return null;
+  }
 
-// Type assertion
-let someValue: unknown = "this is a string";
-let strLength: number = (someValue as string).length;`,
+  const data = input as Record<string, unknown>;
+
+  // Validate each field with type guards
+  if (!isString(data.name) || data.name.trim().length === 0) {
+    return null;
+  }
+
+  if (!isValidEmail(data.email)) {
+    return null;
+  }
+
+  if (!isValidUserId(data.age) || data.age < 0 || data.age > 150) {
+    return null;
+  }
+
+  return {
+    name: data.name.trim(),
+    email: data.email.toLowerCase(),
+    age: data.age
+  };
+}
+
+// 🔒 Safe string operations to prevent XSS
+function sanitizeHtml(input: string): string {
+  return input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
+// ✅ Type-safe API response validation
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+}
+
+function validateApiResponse<T>(
+  response: unknown,
+  validator: (data: unknown) => data is T
+): ApiResponse<T> | null {
+  if (!response || typeof response !== "object") {
+    return null;
+  }
+
+  const resp = response as Record<string, unknown>;
+
+  if (typeof resp.success !== "boolean") {
+    return null;
+  }
+
+  if (!validator(resp.data)) {
+    return null;
+  }
+
+  return resp as ApiResponse<T>;
+}
+
+// 💡 WHEN TO USE:
+// - Always validate external input (forms, APIs, files)
+// - Use type guards for runtime type checking
+// - Sanitize data before displaying in DOM
+// - Validate API responses before using data`,
+        },
+        {
+          title: "Secure API Patterns",
+          description:
+            "Type-safe HTTP requests • Error handling • Input sanitization • Prevent injection attacks",
+          language: "typescript",
+          code: `// 🔒 Secure API client with proper typing
+class SecureApiClient {
+  private readonly baseUrl: string;
+  private readonly defaultHeaders: Record<string, string>;
+
+  constructor(baseUrl: string, apiKey?: string) {
+    this.baseUrl = baseUrl;
+    this.defaultHeaders = {
+      'Content-Type': 'application/json',
+      ...(apiKey && { 'Authorization': \`Bearer \${apiKey}\` })
+    };
+  }
+
+  // ✅ Type-safe GET request with validation
+  async get<T>(
+    endpoint: string, 
+    validator: (data: unknown) => data is T
+  ): Promise<T | null> {
+    try {
+      const url = new URL(endpoint, this.baseUrl);
+      
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: this.defaultHeaders,
+      });
+
+      if (!response.ok) {
+        throw new Error(\`HTTP \${response.status}: \${response.statusText}\`);
+      }
+
+      const data = await response.json();
+      
+      // Validate response structure
+      if (!validator(data)) {
+        throw new Error('Invalid response structure');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('API request failed:', error);
+      return null;
+    }
+  }
+
+  // ✅ Secure POST with input validation
+  async post<TInput, TOutput>(
+    endpoint: string,
+    data: TInput,
+    inputValidator: (data: TInput) => boolean,
+    outputValidator: (data: unknown) => data is TOutput
+  ): Promise<TOutput | null> {
+    // Validate input before sending
+    if (!inputValidator(data)) {
+      throw new Error('Invalid input data');
+    }
+
+    try {
+      const url = new URL(endpoint, this.baseUrl);
+      
+      const response = await fetch(url.toString(), {
+        method: 'POST',
+        headers: this.defaultHeaders,
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error(\`HTTP \${response.status}: \${response.statusText}\`);
+      }
+
+      const result = await response.json();
+      
+      if (!outputValidator(result)) {
+        throw new Error('Invalid response structure');
+      }
+
+      return result;
+    } catch (error) {
+      console.error('API request failed:', error);
+      return null;
+    }
+  }
+}
+
+// 🔒 Environment variable validation
+interface Config {
+  apiUrl: string;
+  apiKey: string;
+  environment: 'development' | 'production' | 'test';
+}
+
+function validateConfig(): Config {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const apiKey = process.env.API_KEY;
+  const environment = process.env.NODE_ENV;
+
+  if (!apiUrl || !isString(apiUrl)) {
+    throw new Error('NEXT_PUBLIC_API_URL is required');
+  }
+
+  if (!apiKey || !isString(apiKey)) {
+    throw new Error('API_KEY is required');
+  }
+
+  if (!environment || !['development', 'production', 'test'].includes(environment)) {
+    throw new Error('Invalid NODE_ENV');
+  }
+
+  return {
+    apiUrl,
+    apiKey,
+    environment: environment as Config['environment']
+  };
+}
+
+// Usage example with validation
+const config = validateConfig();
+const apiClient = new SecureApiClient(config.apiUrl, config.apiKey);
+
+// 💡 SECURITY BEST PRACTICES:
+// - Always validate input and output data
+// - Use type guards for runtime type checking
+// - Sanitize data before displaying
+// - Validate environment variables at startup
+// - Use proper error handling and logging`,
+        },
+      ],
+    },
+    {
+      id: "performance-optimization",
+      title: "Performance & Memory Optimization",
+      description:
+        "Efficient TypeScript patterns • Memory management • Algorithm optimization • Bundle size reduction",
+      examples: [
+        {
+          title: "Memory-Efficient Patterns",
+          description:
+            "Avoid memory leaks • Use proper cleanup • Efficient data structures • Lazy loading strategies",
+          language: "typescript",
+          code: `// ⚡ MEMORY: Efficient data processing patterns
+// Use generators for large datasets
+function* processLargeDataset<T>(data: T[]): Generator<T, void, unknown> {
+  for (const item of data) {
+    // Process one item at a time - memory efficient
+    yield item;
+  }
+}
+
+// ✅ Lazy loading with async iterators
+async function* fetchDataInChunks(
+  urls: string[], 
+  chunkSize: number = 10
+): AsyncGenerator<Response[], void, unknown> {
+  for (let i = 0; i < urls.length; i += chunkSize) {
+    const chunk = urls.slice(i, i + chunkSize);
+    const responses = await Promise.all(
+      chunk.map(url => fetch(url))
+    );
+    yield responses;
+  }
+}
+
+// ⚡ Efficient string concatenation
+function buildReport(items: string[]): string {
+  // ✅ Join is much faster than repeated concatenation
+  return items.join('\\n');
+}
+
+function buildReportSlow(items: string[]): string {
+  // ❌ Inefficient - creates new string each time
+  let result = '';
+  for (const item of items) {
+    result += item + '\\n';
+  }
+  return result;
+}
+
+// 🧠 Memory leak prevention
+class DataProcessor {
+  private cache = new Map<string, any>();
+  private listeners: Array<() => void> = [];
+
+  // ✅ Proper cleanup method
+  cleanup(): void {
+    this.cache.clear();
+    this.listeners.length = 0; // Clear array efficiently
+  }
+
+  // ✅ WeakMap for object associations (auto garbage collection)
+  private weakCache = new WeakMap<object, string>();
+
+  processObject(obj: object): string {
+    if (this.weakCache.has(obj)) {
+      return this.weakCache.get(obj)!;
+    }
+    
+    const result = \`processed-\${Date.now()}\`;
+    this.weakCache.set(obj, result);
+    return result;
+  }
+}
+
+// ⚡ Efficient array operations
+class OptimizedArrayOps {
+  // ✅ Use Set for fast membership testing O(1) vs O(n)
+  static findCommonItems<T>(arr1: T[], arr2: T[]): T[] {
+    const set1 = new Set(arr1);
+    return arr2.filter(item => set1.has(item));
+  }
+
+  // ✅ Batch operations for better performance
+  static processInBatches<T, R>(
+    items: T[],
+    processor: (item: T) => R,
+    batchSize: number = 1000
+  ): R[] {
+    const results: R[] = [];
+    
+    for (let i = 0; i < items.length; i += batchSize) {
+      const batch = items.slice(i, i + batchSize);
+      const batchResults = batch.map(processor);
+      results.push(...batchResults);
+      
+      // Allow other tasks to run
+      if (i % (batchSize * 10) === 0) {
+        // Use setTimeout to yield control
+        return new Promise(resolve => {
+          setTimeout(() => resolve(results), 0);
+        }) as any;
+      }
+    }
+    
+    return results;
+  }
+}
+
+// 💡 MEMORY OPTIMIZATION TIPS:
+// - Use generators for large datasets
+// - Clear unused references explicitly
+// - Use WeakMap/WeakSet for object associations
+// - Process data in chunks to avoid memory spikes
+// - Use Set for fast membership testing`,
+        },
+        {
+          title: "Type System Performance",
+          description:
+            "Optimize TypeScript compilation • Efficient type checking • Bundle size optimization • Tree shaking",
+          language: "typescript",
+          code: `// ⚡ COMPILATION: Optimize TypeScript performance
+// Use literal types for better tree shaking
+type SupportedLanguages = 'en' | 'es' | 'fr' | 'de';
+
+// ✅ Const assertions for better inference
+const SUPPORTED_FORMATS = ['json', 'csv', 'xml'] as const;
+type SupportedFormat = typeof SUPPORTED_FORMATS[number];
+
+// ⚡ Interface merging for better performance
+interface BaseConfig {
+  readonly apiUrl: string;
+  readonly timeout: number;
+}
+
+// Extend instead of intersection for better performance
+interface DevelopmentConfig extends BaseConfig {
+  readonly debug: true;
+  readonly verbose: true;
+}
+
+interface ProductionConfig extends BaseConfig {
+  readonly debug: false;
+  readonly minify: true;
+}
+
+// ✅ Conditional types for efficient type narrowing
+type ConfigByEnv<T extends 'dev' | 'prod'> = 
+  T extends 'dev' ? DevelopmentConfig : ProductionConfig;
+
+// ⚡ Lazy type loading with dynamic imports
+type ComponentType = () => Promise<{ default: React.ComponentType<any> }>;
+
+const lazyComponents: Record<string, ComponentType> = {
+  Dashboard: () => import('./Dashboard'),
+  Profile: () => import('./Profile'),
+  Settings: () => import('./Settings'),
+};
+
+// ✅ Efficient generic constraints
+interface Serializable {
+  toJSON(): string;
+}
+
+// Better than \`extends any\` for performance
+function serialize<T extends Serializable>(obj: T): string {
+  return obj.toJSON();
+}
+
+// ⚡ Bundle optimization with tree shaking
+// Use named exports for better tree shaking
+export { validateUserInput, sanitizeHtml } from './validators';
+export { OptimizedArrayOps } from './array-utils';
+
+// ❌ Avoid default exports for utilities (worse tree shaking)
+// export default { validateUserInput, sanitizeHtml };
+
+// ✅ Conditional loading based on environment
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Only include development tools in dev builds
+const devTools = !isProduction ? {
+  logger: () => import('./dev-logger'),
+  profiler: () => import('./dev-profiler'),
+} : {};
+
+// ⚡ Efficient utility types
+// Use mapped types sparingly in hot paths
+type OptionalFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+// More efficient for simple cases
+type PartialUser = {
+  id?: number;
+  name?: string;
+  email?: string;
+};
+
+// 💡 PERFORMANCE BEST PRACTICES:
+// - Use const assertions for literal types
+// - Prefer interfaces over type intersections
+// - Use dynamic imports for code splitting
+// - Optimize bundle size with proper exports
+// - Avoid complex generic constraints in hot paths`,
+        },
+      ],
+    },
+    {
+      id: "basics",
+      title: "TypeScript Fundamentals",
+      description:
+        "Strategic type usage • Security through type safety • Performance considerations • Best practices",
+      examples: [
+        {
+          title: "Strategic Type Usage",
+          description: "Type safety as security • Choose appropriate types • Avoid common pitfalls • Performance considerations",
+          language: "typescript",
+          code: `// ✅ SECURITY: Prefer specific types over any
+// ❌ Avoid: Loses type safety and opens security holes
+let userInput: any = getUserInput(); // Could be anything!
+
+// ✅ Use: Proper typing with validation
+interface UserInput {
+  name: string;
+  email: string;
+  age: number;
+}
+
+function processUserInput(input: unknown): UserInput | null {
+  // Type validation prevents runtime errors
+  if (!input || typeof input !== 'object') return null;
+  
+  const data = input as Record<string, unknown>;
+  
+  if (typeof data.name !== 'string' || 
+      typeof data.email !== 'string' || 
+      typeof data.age !== 'number') {
+    return null;
+  }
+  
+  return data as UserInput;
+}
+
+// ⚡ PERFORMANCE: Use literal types for better optimization
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'; // Better than string
+type UserRole = 'admin' | 'user' | 'guest'; // Enables tree shaking
+
+// ✅ Const assertions for immutable data
+const API_ENDPOINTS = {
+  users: '/api/users',
+  auth: '/api/auth',
+  settings: '/api/settings'
+} as const; // Readonly and literal types
+
+type ApiEndpoint = typeof API_ENDPOINTS[keyof typeof API_ENDPOINTS];
+
+// 🔒 SAFETY: Strict null checks prevent common errors
+function getUserName(user: User | null): string {
+  // TypeScript forces null checking
+  if (!user) {
+    return 'Anonymous';
+  }
+  return user.name; // Safe to access
+}
+
+// ⚡ Union types for efficient data structures
+type LoadingState = 
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: any }
+  | { status: 'error'; error: string };
+
+// TypeScript can narrow types automatically
+function handleState(state: LoadingState) {
+  switch (state.status) {
+    case 'success':
+      // state.data is available here
+      console.log(state.data);
+      break;
+    case 'error':
+      // state.error is available here
+      console.log(state.error);
+      break;
+  }
+}
+
+// 💡 WHEN TO USE:
+// - unknown over any for external data
+// - Literal types for known values
+// - Union types for state management
+// - Const assertions for configuration`,
         },
         {
           title: "Interfaces and Type Aliases",
@@ -1213,121 +1702,356 @@ declare module 'express-serve-static-core' {
 }`,
         },
         {
-          title: "Development Tools and Debugging",
+          title: "Strategic Testing Patterns",
           description:
-            "TypeScript debugging, testing setup, and development utilities",
+            "Type-safe testing • Mock external dependencies • Test error conditions • Test-driven development",
           language: "typescript",
-          code: `// Development environment setup
-const isDevelopment = process.env.NODE_ENV === 'development';
-const isProduction = process.env.NODE_ENV === 'production';
-
-// Type-safe environment variables
-const config = {
-  apiUrl: process.env.NEXT_PUBLIC_API_URL!,
-  dbUrl: process.env.DATABASE_URL!,
-  jwtSecret: process.env.JWT_SECRET!,
-} as const;
-
-// Assertion functions for debugging
-function assertIsString(value: unknown): asserts value is string {
-  if (typeof value !== 'string') {
-    throw new Error(\`Expected string, got \${typeof value}\`);
-  }
+          code: `// ✅ Testable function design with clear types
+interface UserScore {
+  userId: number;
+  score: number;
+  bonusMultiplier: number;
+  timestamp: Date;
 }
 
-function assertIsUser(value: unknown): asserts value is User {
-  if (!value || typeof value !== 'object') {
-    throw new Error('Expected user object');
+function calculateUserScore(
+  userId: number, 
+  actions: string[], 
+  bonusMultiplier: number = 1.0
+): UserScore {
+  if (userId <= 0) {
+    throw new Error("Invalid user ID");
   }
 
-  const user = value as Record<string, unknown>;
-  if (typeof user.id !== 'number' || typeof user.name !== 'string') {
-    throw new Error('Invalid user object structure');
+  if (bonusMultiplier < 0) {
+    throw new Error("Bonus multiplier cannot be negative");
   }
+
+  const baseScore = actions.length * 10;
+  const finalScore = Math.floor(baseScore * bonusMultiplier);
+
+  return {
+    userId,
+    score: finalScore,
+    bonusMultiplier,
+    timestamp: new Date()
+  };
 }
 
-// Debug utility function
-function debugLog<T>(label: string, value: T): T {
-  if (isDevelopment) {
-    console.group(\`🐛 \${label}\`);
-    console.log('Type:', typeof value);
-    console.log('Value:', value);
-    console.groupEnd();
-  }
-  return value;
-}
-
-// Type-safe fetch wrapper
-async function apiRequest<T>(
-  url: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const response = await fetch(\`\${config.apiUrl}\${url}\`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
+// ✅ Comprehensive test suite with Jest
+describe('calculateUserScore', () => {
+  // Test normal cases
+  it('should calculate score correctly for valid input', () => {
+    const result = calculateUserScore(123, ['login', 'view', 'purchase']);
+    
+    expect(result.userId).toBe(123);
+    expect(result.score).toBe(30); // 3 actions * 10 points
+    expect(result.bonusMultiplier).toBe(1.0);
+    expect(result.timestamp).toBeInstanceOf(Date);
   });
 
-  if (!response.ok) {
-    throw new Error(\`API Error: \${response.status} \${response.statusText}\`);
-  }
-
-  const data = await response.json();
-  return data as T;
-}
-
-// Testing utilities with TypeScript
-// jest.config.js setup for TypeScript
-export default {
-  preset: 'ts-jest',
-  testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
-  moduleNameMapping: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-  },
-  transform: {
-    '^.+\\\\.tsx?$': 'ts-jest',
-  },
-  collectCoverageFrom: [
-    'src/**/*.{ts,tsx}',
-    '!src/**/*.d.ts',
-    '!src/test/**/*',
-  ],
-};
-
-// Type-safe test utilities
-interface RenderOptions {
-  preloadedState?: Partial<AppState>;
-  route?: string;
-}
-
-function renderWithProviders(
-  ui: React.ReactElement,
-  options: RenderOptions = {}
-) {
-  // Test rendering implementation
-}
-
-// Mock type definitions for testing
-type MockFunction<T extends (...args: any[]) => any> = jest.MockedFunction<T>;
-
-const mockApiRequest = apiRequest as MockFunction<typeof apiRequest>;
-
-// TypeScript compiler API usage
-import * as ts from 'typescript';
-
-function checkTypeScript(fileName: string, source: string) {
-  const result = ts.transpileModule(source, {
-    compilerOptions: {
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2020,
-    },
+  // Test edge cases
+  it('should handle empty actions array', () => {
+    const result = calculateUserScore(123, []);
+    expect(result.score).toBe(0);
   });
 
-  return result.outputText;
-}`,
+  // Test error conditions
+  it('should throw error for invalid user ID', () => {
+    expect(() => {
+      calculateUserScore(-1, ['action']);
+    }).toThrow('Invalid user ID');
+  });
+
+  it('should throw error for negative bonus multiplier', () => {
+    expect(() => {
+      calculateUserScore(123, ['action'], -0.5);
+    }).toThrow('Bonus multiplier cannot be negative');
+  });
+
+  // Test with bonus multiplier
+  it('should apply bonus multiplier correctly', () => {
+    const result = calculateUserScore(123, ['login', 'purchase'], 1.5);
+    expect(result.score).toBe(30); // 2 * 10 * 1.5 = 30 (floored)
+  });
+});
+
+// ✅ Mocking external dependencies
+interface ApiClient {
+  getUser(id: number): Promise<User>;
+  updateUser(id: number, data: Partial<User>): Promise<boolean>;
+}
+
+// Service that depends on external API
+class UserService {
+  constructor(private apiClient: ApiClient) {}
+
+  async getUserScore(userId: number): Promise<number | null> {
+    try {
+      const user = await this.apiClient.getUser(userId);
+      if (!user) return null;
+      
+      // Business logic here
+      return user.loginCount * 10;
+    } catch (error) {
+      console.error('Failed to get user score:', error);
+      return null;
+    }
+  }
+}
+
+// ✅ Test with mocked dependencies
+describe('UserService', () => {
+  let userService: UserService;
+  let mockApiClient: jest.Mocked<ApiClient>;
+
+  beforeEach(() => {
+    mockApiClient = {
+      getUser: jest.fn(),
+      updateUser: jest.fn(),
+    };
+    userService = new UserService(mockApiClient);
+  });
+
+  it('should return user score when user exists', async () => {
+    const mockUser: User = {
+      id: 123,
+      name: 'Alice',
+      email: 'alice@test.com',
+      loginCount: 5,
+      createdAt: new Date()
+    };
+
+    mockApiClient.getUser.mockResolvedValue(mockUser);
+
+    const score = await userService.getUserScore(123);
+    
+    expect(score).toBe(50); // 5 logins * 10
+    expect(mockApiClient.getUser).toHaveBeenCalledWith(123);
+  });
+
+  it('should return null when user not found', async () => {
+    mockApiClient.getUser.mockResolvedValue(null);
+
+    const score = await userService.getUserScore(999);
+    
+    expect(score).toBeNull();
+  });
+
+  it('should handle API errors gracefully', async () => {
+    mockApiClient.getUser.mockRejectedValue(new Error('API Error'));
+
+    const score = await userService.getUserScore(123);
+    
+    expect(score).toBeNull();
+  });
+});
+
+// 💡 TESTING BEST PRACTICES:
+// - Test edge cases (empty, null, boundary values)
+// - Test error conditions and exceptions
+// - Use mocks for external dependencies
+// - Test both success and failure paths
+// - Keep tests focused and isolated`,
+        },
+        {
+          title: "Debugging & Error Handling",
+          description:
+            "Advanced debugging techniques • Type-safe error handling • Logging strategies • Development tools",
+          language: "typescript",
+          code: `// ✅ Comprehensive error handling with types
+class AppError extends Error {
+  constructor(
+    message: string,
+    public readonly code: string,
+    public readonly statusCode: number = 500,
+    public readonly context?: Record<string, unknown>
+  ) {
+    super(message);
+    this.name = 'AppError';
+  }
+}
+
+class ValidationError extends AppError {
+  constructor(message: string, field: string, value: unknown) {
+    super(message, 'VALIDATION_ERROR', 400, { field, value });
+    this.name = 'ValidationError';
+  }
+}
+
+class NotFoundError extends AppError {
+  constructor(resource: string, id: string | number) {
+    super(\`\${resource} not found\`, 'NOT_FOUND', 404, { resource, id });
+    this.name = 'NotFoundError';
+  }
+}
+
+// ✅ Type-safe error handling utility
+type Result<T, E = Error> = 
+  | { success: true; data: T }
+  | { success: false; error: E };
+
+async function safeAsync<T>(
+  operation: () => Promise<T>
+): Promise<Result<T, AppError>> {
+  try {
+    const data = await operation();
+    return { success: true, data };
+  } catch (error) {
+    if (error instanceof AppError) {
+      return { success: false, error };
+    }
+    
+    // Convert unknown errors to AppError
+    const appError = new AppError(
+      error instanceof Error ? error.message : 'Unknown error',
+      'UNKNOWN_ERROR',
+      500,
+      { originalError: error }
+    );
+    
+    return { success: false, error: appError };
+  }
+}
+
+// ✅ Comprehensive logging system
+enum LogLevel {
+  DEBUG = 0,
+  INFO = 1,
+  WARN = 2,
+  ERROR = 3,
+}
+
+interface LogContext {
+  userId?: number;
+  requestId?: string;
+  operation?: string;
+  [key: string]: unknown;
+}
+
+class Logger {
+  constructor(
+    private level: LogLevel = LogLevel.INFO,
+    private context: LogContext = {}
+  ) {}
+
+  private log(level: LogLevel, message: string, data?: unknown): void {
+    if (level < this.level) return;
+
+    const timestamp = new Date().toISOString();
+    const logEntry = {
+      timestamp,
+      level: LogLevel[level],
+      message,
+      context: this.context,
+      ...(data && { data }),
+    };
+
+    console.log(JSON.stringify(logEntry));
+  }
+
+  debug(message: string, data?: unknown): void {
+    this.log(LogLevel.DEBUG, message, data);
+  }
+
+  info(message: string, data?: unknown): void {
+    this.log(LogLevel.INFO, message, data);
+  }
+
+  warn(message: string, data?: unknown): void {
+    this.log(LogLevel.WARN, message, data);
+  }
+
+  error(message: string, error?: Error | unknown): void {
+    const errorData = error instanceof Error 
+      ? { message: error.message, stack: error.stack }
+      : error;
+    
+    this.log(LogLevel.ERROR, message, errorData);
+  }
+
+  withContext(context: LogContext): Logger {
+    return new Logger(this.level, { ...this.context, ...context });
+  }
+}
+
+// ✅ Debug decorators for development
+function debugMethod(target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  const method = descriptor.value;
+
+  descriptor.value = function (...args: any[]) {
+    const logger = new Logger(LogLevel.DEBUG);
+    
+    logger.debug(\`Calling \${target.constructor.name}.\${propertyName}\`, {
+      arguments: args,
+    });
+
+    try {
+      const result = method.apply(this, args);
+      
+      if (result instanceof Promise) {
+        return result
+          .then((res) => {
+            logger.debug(\`\${target.constructor.name}.\${propertyName} resolved\`, res);
+            return res;
+          })
+          .catch((err) => {
+            logger.error(\`\${target.constructor.name}.\${propertyName} rejected\`, err);
+            throw err;
+          });
+      }
+      
+      logger.debug(\`\${target.constructor.name}.\${propertyName} returned\`, result);
+      return result;
+    } catch (error) {
+      logger.error(\`\${target.constructor.name}.\${propertyName} threw error\`, error);
+      throw error;
+    }
+  };
+}
+
+// Usage example
+class UserRepository {
+  @debugMethod
+  async findById(id: number): Promise<User | null> {
+    // Implementation
+    if (id <= 0) {
+      throw new ValidationError('Invalid user ID', 'id', id);
+    }
+    
+    // Simulate API call
+    return { id, name: 'Alice', email: 'alice@test.com', createdAt: new Date() };
+  }
+}
+
+// ✅ Performance monitoring
+function measurePerformance<T extends (...args: any[]) => any>(
+  fn: T,
+  name: string
+): T {
+  return ((...args: any[]) => {
+    const start = performance.now();
+    const result = fn(...args);
+    
+    if (result instanceof Promise) {
+      return result.finally(() => {
+        const end = performance.now();
+        console.log(\`⏱️ \${name} took \${end - start}ms\`);
+      });
+    }
+    
+    const end = performance.now();
+    console.log(\`⏱️ \${name} took \${end - start}ms\`);
+    return result;
+  }) as T;
+}
+
+// 💡 DEBUGGING STRATEGIES:
+// - Use typed errors for better error handling
+// - Implement comprehensive logging with context
+// - Use decorators for method tracing in development
+// - Monitor performance of critical operations
+// - Include relevant context in all log messages`,
         },
       ],
     },

@@ -706,7 +706,7 @@ class Bird extends Animal implements Flyable {
     {
       id: "advanced",
       title: "Advanced TypeScript",
-      description: "Generics, utility types, and advanced type patterns",
+      description: "Strategic type patterns • Compile-time safety • Advanced generics • Type-level programming",
       examples: [
         {
           title: "Generics and Constraints",
@@ -952,7 +952,7 @@ function processError(error: unknown) {
     {
       id: "react",
       title: "TypeScript with React",
-      description: "React components, hooks, and patterns with TypeScript",
+      description: "Secure React patterns • Type-safe components • Performance optimization • Error boundaries",
       examples: [
         {
           title: "React Component Types",
@@ -1037,6 +1037,181 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     );
   }
 );`,
+        },
+        {
+          title: "Secure React Patterns",
+          description:
+            "Input sanitization • XSS prevention • Type-safe event handling • Secure data rendering",
+          language: "tsx",
+          code: `import React, { useState, useCallback } from 'react';
+import DOMPurify from 'dompurify';
+
+// 🔒 SECURITY: Safe HTML rendering component
+interface SafeHtmlProps {
+  content: string;
+  className?: string;
+  allowedTags?: string[];
+}
+
+const SafeHtml: React.FC<SafeHtmlProps> = ({ 
+  content, 
+  className,
+  allowedTags = ['b', 'i', 'em', 'strong'] 
+}) => {
+  const sanitizedContent = DOMPurify.sanitize(content, {
+    ALLOWED_TAGS: allowedTags,
+    ALLOWED_ATTR: [],
+  });
+
+  return (
+    <div 
+      className={className}
+      dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+    />
+  );
+};
+
+// ✅ Type-safe form with validation
+interface UserFormData {
+  name: string;
+  email: string;
+  message: string;
+}
+
+interface ValidationErrors {
+  [K in keyof UserFormData]?: string;
+}
+
+const SecureContactForm: React.FC = () => {
+  const [formData, setFormData] = useState<UserFormData>({
+    name: '',
+    email: '',
+    message: ''
+  });
+  const [errors, setErrors] = useState<ValidationErrors>({});
+
+  // ✅ Input validation with type safety
+  const validateField = useCallback((field: keyof UserFormData, value: string): string | undefined => {
+    switch (field) {
+      case 'name':
+        if (value.trim().length < 2) return 'Name must be at least 2 characters';
+        if (!/^[a-zA-Z\\s]+$/.test(value)) return 'Name can only contain letters and spaces';
+        break;
+      case 'email':
+        if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value)) return 'Invalid email format';
+        break;
+      case 'message':
+        if (value.trim().length < 10) return 'Message must be at least 10 characters';
+        if (value.length > 1000) return 'Message too long (max 1000 characters)';
+        break;
+    }
+    return undefined;
+  }, []);
+
+  // 🔒 Secure input handler with sanitization
+  const handleInputChange = useCallback((field: keyof UserFormData) => 
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const value = event.target.value;
+      
+      // Basic sanitization - remove potential XSS patterns
+      const sanitizedValue = value
+        .replace(/<script[^>]*>.*?<\\/script>/gi, '')
+        .replace(/<[^>]*>/g, '');
+
+      setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
+      
+      // Real-time validation
+      const error = validateField(field, sanitizedValue);
+      setErrors(prev => ({ ...prev, [field]: error }));
+    }, [validateField]);
+
+  // ✅ Secure form submission
+  const handleSubmit = useCallback(async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    // Validate all fields
+    const newErrors: ValidationErrors = {};
+    (Object.keys(formData) as Array<keyof UserFormData>).forEach(field => {
+      const error = validateField(field, formData[field]);
+      if (error) newErrors[field] = error;
+    });
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      try {
+        // Send to secure API endpoint
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+
+        if (!response.ok) {
+          throw new Error('Submission failed');
+        }
+
+        // Reset form on success
+        setFormData({ name: '', email: '', message: '' });
+        alert('Message sent successfully!');
+      } catch (error) {
+        console.error('Submission error:', error);
+        alert('Failed to send message. Please try again.');
+      }
+    }
+  }, [formData, validateField]);
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label htmlFor="name">Name:</label>
+        <input
+          id="name"
+          type="text"
+          value={formData.name}
+          onChange={handleInputChange('name')}
+          aria-invalid={!!errors.name}
+          aria-describedby={errors.name ? 'name-error' : undefined}
+        />
+        {errors.name && <span id="name-error" className="error">{errors.name}</span>}
+      </div>
+
+      <div>
+        <label htmlFor="email">Email:</label>
+        <input
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={handleInputChange('email')}
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? 'email-error' : undefined}
+        />
+        {errors.email && <span id="email-error" className="error">{errors.email}</span>}
+      </div>
+
+      <div>
+        <label htmlFor="message">Message:</label>
+        <textarea
+          id="message"
+          value={formData.message}
+          onChange={handleInputChange('message')}
+          aria-invalid={!!errors.message}
+          aria-describedby={errors.message ? 'message-error' : undefined}
+        />
+        {errors.message && <span id="message-error" className="error">{errors.message}</span>}
+      </div>
+
+      <button type="submit">Send Message</button>
+    </form>
+  );
+};
+
+// 💡 SECURITY BEST PRACTICES:
+// - Always validate and sanitize user input
+// - Use type-safe event handlers
+// - Implement proper error handling
+// - Use DOMPurify for safe HTML rendering
+// - Include ARIA attributes for accessibility`,
         },
         {
           title: "React Hooks with TypeScript",

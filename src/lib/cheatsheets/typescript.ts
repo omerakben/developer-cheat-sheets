@@ -3,622 +3,584 @@ import { CheatSheet } from "@/types/cheatsheet";
 export const typescriptCheatSheet: CheatSheet = {
   title: "TypeScript Cheat Sheet",
   description:
-    "Modern TypeScript with React integration, type safety, and best practices",
+    "Strategic TypeScript guide for mid-level developers • Security-first approach • Performance patterns • Type safety best practices",
   sections: [
     {
-      id: "basics",
-      title: "TypeScript Basics",
+      id: "essentials-security",
+      title: "TypeScript Essentials & Security",
       description:
-        "Core types, interfaces, and fundamental TypeScript concepts",
+        "Type safety for security • Input validation • Safe coding patterns • Prevent runtime errors",
       examples: [
         {
-          title: "Basic Types",
-          description: "TypeScript's built-in types and type annotations",
+          title: "Type Safety & Security-First Patterns",
+          description:
+            "Strict types prevent injection • Input validation • Runtime type checking • Null safety patterns",
           language: "typescript",
-          code: `// Primitive types
-let name: string = "TypeScript";
-let age: number = 5;
-let isActive: boolean = true;
-let items: number[] = [1, 2, 3];
-let scores: Array<number> = [95, 87, 92];
-
-// Union types
-let id: string | number = "user-123";
-id = 456; // Also valid
-
-// Literal types
-let status: "loading" | "success" | "error" = "loading";
-let size: "small" | "medium" | "large" = "medium";
-
-// Any and unknown
-let data: any = "could be anything";
-let userInput: unknown = "safe unknown type";
-
-// Null and undefined
-let optional: string | null = null;
-let maybe: string | undefined = undefined;
-
-// Type assertion
-let someValue: unknown = "this is a string";
-let strLength: number = (someValue as string).length;`,
-        },
-        {
-          title: "Interfaces and Type Aliases",
-          description: "Defining custom types and object structures",
-          language: "typescript",
-          code: `// Interface definition
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  isActive?: boolean; // Optional property
-  readonly createdAt: Date; // Read-only property
+          code: `// 🔒 SECURITY: Strict types prevent injection attacks
+interface SafeUserInput {
+  readonly username: string;
+  readonly email: string;
+  readonly age: number;
 }
 
-// Extending interfaces
-interface AdminUser extends User {
-  permissions: string[];
-  lastLogin: Date;
+// ✅ Always validate external input with type guards
+function isValidUserInput(input: unknown): input is SafeUserInput {
+  return (
+    typeof input === 'object' &&
+    input !== null &&
+    typeof (input as any).username === 'string' &&
+    typeof (input as any).email === 'string' &&
+    typeof (input as any).age === 'number' &&
+    (input as any).age > 0 &&
+    (input as any).age < 150 &&
+    (input as any).email.includes('@')
+  );
 }
 
-// Type aliases
-type Status = "pending" | "approved" | "rejected";
-type UserRole = "admin" | "user" | "guest";
-
-// Function types
-type EventHandler = (event: Event) => void;
-type ApiResponse<T> = {
-  data: T;
-  success: boolean;
-  message?: string;
-};
-
-// Index signatures
-interface Dictionary {
-  [key: string]: any;
-}
-
-// Using types
-const user: User = {
-  id: 1,
-  name: "John Doe",
-  email: "john@example.com",
-  createdAt: new Date()
-};
-
-const response: ApiResponse<User[]> = {
-  data: [user],
-  success: true
-};`,
-        },
-        {
-          title: "Functions and Type Safety",
-          description: "Function signatures, parameters, and return types",
-          language: "typescript",
-          code: `// Function declarations
-function greet(name: string): string {
-  return \`Hello, \${name}!\`;
-}
-
-// Arrow functions with types
-const add = (x: number, y: number): number => x + y;
-
-// Optional and default parameters
-function createUser(
-  name: string,
-  age?: number,
-  isActive: boolean = true
-): User {
+// 🔒 Safe user input processing
+function processUserRegistration(rawInput: unknown): SafeUserInput | null {
+  if (!isValidUserInput(rawInput)) {
+    console.error('Invalid user input detected');
+    return null;
+  }
+  
+  // Now TypeScript knows the type is safe
   return {
-    id: Math.random(),
-    name,
-    email: \`\${name.toLowerCase()}@example.com\`,
-    isActive,
-    createdAt: new Date()
+    username: rawInput.username.trim().toLowerCase(),
+    email: rawInput.email.trim().toLowerCase(),
+    age: rawInput.age
   };
 }
 
-// Rest parameters
-function sum(...numbers: number[]): number {
-  return numbers.reduce((total, num) => total + num, 0);
-}
+// ✅ Literal types for controlled values - prevents injection
+type UserRole = 'admin' | 'user' | 'guest';
+type ApiEndpoint = '/api/users' | '/api/orders' | '/api/products';
 
-// Function overloads
-function process(input: string): string;
-function process(input: number): number;
-function process(input: string | number): string | number {
-  if (typeof input === "string") {
-    return input.toUpperCase();
-  }
-  return input * 2;
-}
+// 🔒 Template literal types for safe string construction
+type SafeUrl = \`\${ApiEndpoint}?id=\${number}\`;
 
-// Generic functions
-function identity<T>(arg: T): T {
-  return arg;
-}
-
-const stringResult = identity<string>("hello");
-const numberResult = identity<number>(42);`,
+// 💡 WHEN TO USE: Always validate external data (APIs, forms, localStorage)
+// 💡 WHY: TypeScript types are compile-time only - runtime validation is essential`,
         },
         {
-          title: "Classes and Access Modifiers",
-          description: "Object-oriented programming with TypeScript classes",
+          title: "Defensive Programming with Types",
+          description:
+            "Null safety • Optional chaining • Type assertions • Error boundaries • Comprehensive validation",
           language: "typescript",
-          code: `// Class with access modifiers
-class User {
-  public readonly id: number;
-  private password: string;
-  protected email: string;
+          code: `// 🔒 SECURITY: Null safety patterns - prevent runtime crashes
+interface User {
+  id: number;
+  name: string;
+  email?: string; // Optional - could be undefined
+  profile?: {
+    avatar?: string;
+    bio?: string;
+  };
+}
 
-  constructor(
-    id: number,
-    email: string,
-    private name: string // Parameter property
-  ) {
-    this.id = id;
-    this.email = email;
-    this.password = this.generatePassword();
+// ✅ Safe property access with optional chaining
+function getUserAvatarUrl(user: User | null | undefined): string | null {
+  // Type-safe navigation through potentially null/undefined properties
+  return user?.profile?.avatar ?? null;
+}
+
+// ✅ Non-null assertion with validation
+function getValidatedEmail(user: User): string {
+  if (!user.email) {
+    throw new Error('User email is required but not provided');
   }
+  // Now TypeScript knows email is definitely string
+  return user.email;
+}
 
-  // Public method
-  public getName(): string {
-    return this.name;
-  }
-
-  // Private method
-  private generatePassword(): string {
-    return Math.random().toString(36).slice(-8);
-  }
-
-  // Protected method
-  protected validateEmail(email: string): boolean {
-    return email.includes("@");
-  }
-
-  // Static method
-  static createGuest(): User {
-    return new User(0, "guest@example.com", "Guest");
+// 🔒 Safe type assertions with validation
+function parseJsonSafely<T>(jsonStr: string, validator: (data: unknown) => data is T): T | null {
+  try {
+    const parsed: unknown = JSON.parse(jsonStr);
+    if (validator(parsed)) {
+      return parsed;
+    }
+    console.error('JSON validation failed');
+    return null;
+  } catch (error) {
+    console.error('JSON parsing failed:', error);
+    return null;
   }
 }
 
-// Abstract class
-abstract class Animal {
-  abstract makeSound(): void;
+// ✅ Discriminated unions for error handling
+type ApiResult<T> = 
+  | { success: true; data: T }
+  | { success: false; error: string; code: number };
 
-  move(): void {
-    console.log("Moving...");
+function handleApiResult<T>(result: ApiResult<T>): T | null {
+  if (result.success) {
+    return result.data; // TypeScript knows this is T
+  } else {
+    console.error(\`API Error \${result.code}: \${result.error}\`);
+    return null;
   }
 }
 
-class Dog extends Animal {
-  makeSound(): void {
-    console.log("Woof!");
+// 🔒 Strict configuration for security
+// Enable in tsconfig.json:
+// "strict": true,
+// "noUncheckedIndexedAccess": true,
+// "exactOptionalPropertyTypes": true
+
+// 💡 SECURITY BEST PRACTICES:
+// - Use optional chaining (?.) for safe property access
+// - Validate before type assertions
+// - Use discriminated unions for error states
+// - Enable strict TypeScript options
+// - Never ignore compiler warnings`,
+        },
+        {
+          title: "Strict Function Signatures & Input Validation",
+          description:
+            "Type-safe functions • Parameter validation • Return type safety • Overload patterns",
+          language: "typescript",
+          code: `// ✅ Strict function signatures with validation
+function createUser(
+  name: string,
+  email: string,
+  age?: number
+): { success: true; user: User } | { success: false; error: string } {
+  // Input validation
+  if (!name.trim()) {
+    return { success: false, error: 'Name cannot be empty' };
   }
+  
+  if (!email.includes('@')) {
+    return { success: false, error: 'Invalid email format' };
+  }
+  
+  if (age !== undefined && (age < 0 || age > 150)) {
+    return { success: false, error: 'Age must be between 0 and 150' };
+  }
+  
+  return {
+    success: true,
+    user: {
+      id: Math.random(),
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      age
+    }
+  };
 }
 
-// Class implementing interface
-interface Flyable {
-  fly(): void;
+// 🔒 Safe array operations with proper typing
+function safeArrayAccess<T>(array: readonly T[], index: number): T | undefined {
+  if (index < 0 || index >= array.length) {
+    return undefined;
+  }
+  return array[index];
 }
 
-class Bird extends Animal implements Flyable {
-  makeSound(): void {
-    console.log("Chirp!");
+// ⚡ PERFORMANCE: Function overloads for optimization
+function processData(data: string): string;
+function processData(data: number): number;
+function processData(data: string[]): string[];
+function processData(data: string | number | string[]): string | number | string[] {
+  if (typeof data === 'string') {
+    return data.trim().toUpperCase(); // Optimized string processing
   }
+  if (typeof data === 'number') {
+    return data * 2; // Fast numeric operation
+  }
+  return data.map(item => item.trim()); // Batch array processing
+}
 
-  fly(): void {
-    console.log("Flying...");
+// ✅ Generic constraints for type safety
+interface Identifiable {
+  id: string | number;
+}
+
+function findById<T extends Identifiable>(
+  items: readonly T[],
+  id: string | number
+): T | undefined {
+  return items.find(item => item.id === id);
+}
+
+// 🔒 Branded types for additional security
+type UserId = string & { readonly __brand: 'UserId' };
+type EmailAddress = string & { readonly __brand: 'EmailAddress' };
+
+function createUserId(value: string): UserId | null {
+  if (value.length < 3 || value.length > 50) {
+    return null;
   }
-}`,
+  return value as UserId;
+}
+
+function sendEmail(to: EmailAddress, subject: string): Promise<void> {
+  // TypeScript ensures only validated emails can be passed
+  return fetch('/api/send-email', {
+    method: 'POST',
+    body: JSON.stringify({ to, subject })
+  }).then(() => undefined);
+}
+
+// 💡 WHEN TO USE:
+// - Function overloads: When same operation works on different types
+// - Branded types: When you need extra validation beyond basic types
+// - Result types: Instead of throwing errors for expected failures
+// - Generic constraints: When you need specific properties on generic types`,
         },
       ],
     },
     {
-      id: "advanced",
-      title: "Advanced TypeScript",
-      description: "Generics, utility types, and advanced type patterns",
+      id: "performance-type-system", 
+      title: "Performance & Type System Optimization",
+      description:
+        "Efficient types • Compiler optimizations • Memory considerations • Build performance",
       examples: [
         {
-          title: "Generics and Constraints",
-          description: "Generic types with constraints and conditional logic",
+          title: "High-Performance Type Patterns",
+          description:
+            "Optimize compilation • Efficient utility types • Avoid expensive operations • Memory-conscious patterns",
           language: "typescript",
-          code: `// Basic generics
-interface Container<T> {
-  value: T;
-  getValue(): T;
+          code: `// ⚡ PERFORMANCE: Prefer interfaces over type aliases for objects
+interface User {  // ✅ Faster compilation, better error messages
+  id: number;
+  name: string;
+  email: string;
 }
 
-class Box<T> implements Container<T> {
-  constructor(public value: T) {}
+// ❌ Slower for complex object types
+// type User = { id: number; name: string; email: string; }
 
-  getValue(): T {
-    return this.value;
+// ⚡ Efficient union types - order matters for performance
+type Status = 'active' | 'inactive' | 'pending' | 'suspended';
+// Put most common values first for faster type checking
+
+// ✅ Const assertions for immutable data - prevents unnecessary copying
+const USER_ROLES = ['admin', 'user', 'guest'] as const;
+type UserRole = typeof USER_ROLES[number]; // 'admin' | 'user' | 'guest'
+
+const API_ENDPOINTS = {
+  users: '/api/users',
+  orders: '/api/orders',
+  products: '/api/products'
+} as const;
+type ApiEndpoint = typeof API_ENDPOINTS[keyof typeof API_ENDPOINTS];
+
+// ⚡ Efficient mapped types - avoid expensive recursion
+type Optional<T> = {
+  [K in keyof T]?: T[K];
+};
+
+// ❌ Avoid deeply recursive types (can cause compilation timeouts)
+// type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K]; }
+
+// ✅ Use conditional types efficiently 
+type NonNullable<T> = T extends null | undefined ? never : T;
+
+// ⚡ Template literal performance optimization
+type EventName = 'click' | 'focus' | 'blur';
+type Handler<T extends EventName> = \`on\${Capitalize<T>}\`;
+// Results in: 'onClick' | 'onFocus' | 'onBlur'
+
+// 🔍 COMPILER PERFORMANCE: Use module augmentation sparingly
+declare module 'some-library' {
+  interface ExistingInterface {
+    newProperty: string;
   }
 }
 
-// Generic constraints
-interface Lengthwise {
-  length: number;
-}
-
-function logLength<T extends Lengthwise>(arg: T): T {
-  console.log(arg.length);
-  return arg;
-}
-
-// Using multiple type parameters
-function merge<T, U>(obj1: T, obj2: U): T & U {
-  return { ...obj1, ...obj2 };
-}
-
-// Conditional types
-type NonNullable<T> = T extends null | undefined ? never : T;
-type ApiResult<T> = T extends string ? string[] : number[];
-
-// Mapped types
-type Partial<T> = {
-  [P in keyof T]?: T[P];
-};
-
-type Required<T> = {
-  [P in keyof T]-?: T[P];
-};
-
-// Key remapping
-type Getters<T> = {
-  [K in keyof T as \`get\${Capitalize<string & K>}\`]: () => T[K];
-};
-
-type UserGetters = Getters<User>;
-// Result: { getName: () => string; getEmail: () => string; ... }`,
+// 💡 PERFORMANCE TIPS:
+// - Use interfaces for object shapes
+// - Prefer const assertions over union types
+// - Limit template literal type complexity
+// - Avoid deep recursive types
+// - Use branded types sparingly`,
         },
         {
-          title: "Utility Types",
+          title: "Strategic Utility Types & Advanced Patterns",
           description:
-            "Built-in TypeScript utility types for type transformations",
+            "Built-in utilities • Custom type utilities • Type-level programming • Conditional logic",
           language: "typescript",
-          code: `interface User {
+          code: `// ⚡ PERFORMANCE: Efficient utility type usage
+interface UserProfile {
   id: number;
   name: string;
   email: string;
   password: string;
-  role: "admin" | "user";
+  role: 'admin' | 'user';
+  lastLogin: Date;
+  preferences: {
+    theme: 'light' | 'dark';
+    notifications: boolean;
+  };
 }
 
-// Partial - makes all properties optional
-type PartialUser = Partial<User>;
-// { id?: number; name?: string; email?: string; ... }
+// ✅ Strategic use of Pick for API types
+type PublicUserProfile = Pick<UserProfile, 'id' | 'name' | 'email' | 'role'>;
+type UserPreferences = Pick<UserProfile, 'preferences'>['preferences'];
 
-// Required - makes all properties required
-type RequiredUser = Required<PartialUser>;
+// ✅ Omit for creating safe update types
+type UserUpdateData = Omit<UserProfile, 'id' | 'password' | 'lastLogin'>;
 
-// Pick - selects specific properties
-type PublicUser = Pick<User, "id" | "name" | "email">;
-// { id: number; name: string; email: string; }
-
-// Omit - excludes specific properties
-type UserWithoutPassword = Omit<User, "password">;
-// { id: number; name: string; email: string; role: "admin" | "user"; }
-
-// Record - creates type with specific keys and values
-type UserRoles = Record<"admin" | "moderator" | "user", string[]>;
-// { admin: string[]; moderator: string[]; user: string[]; }
-
-// Extract and Exclude
-type AdminRole = Extract<User["role"], "admin">; // "admin"
-type NonAdminRole = Exclude<User["role"], "admin">; // "user"
-
-// ReturnType and Parameters
-function getUser(id: number): Promise<User> {
-  return Promise.resolve({} as User);
-}
-
-type GetUserReturn = ReturnType<typeof getUser>; // Promise<User>
-type GetUserParams = Parameters<typeof getUser>; // [number]
-
-// Awaited - unwraps Promise types
-type UserData = Awaited<GetUserReturn>; // User
-
-// NonNullable - removes null and undefined
-type SafeString = NonNullable<string | null | undefined>; // string`,
-        },
-        {
-          title: "Mapped Types and Template Literals",
-          description:
-            "Advanced type manipulation with mapped types and template literal types",
-          language: "typescript",
-          code: `// Template literal types
-type EventName = "click" | "focus" | "blur";
-type HandlerName = \`on\${Capitalize<EventName>}\`;
-// Result: "onClick" | "onFocus" | "onBlur"
-
-// Template literal patterns
-type CSSProperties = "margin" | "padding" | "border";
-type CSSUnits = "px" | "rem" | "em" | "%";
-type CSSValue = \`\${number}\${CSSUnits}\`;
-
-// Advanced mapped types
-type EventHandlers<T extends Record<string, any>> = {
-  [K in keyof T as \`on\${Capitalize<string & K>}\`]: (value: T[K]) => void;
-};
-
-interface FormData {
-  username: string;
-  email: string;
-  age: number;
-}
-
-type FormHandlers = EventHandlers<FormData>;
-// {
-//   onUsername: (value: string) => void;
-//   onEmail: (value: string) => void;
-//   onAge: (value: number) => void;
-// }
-
-// Recursive mapped types
+// ⚡ Custom utility types for common patterns
 type DeepReadonly<T> = {
-  readonly [P in keyof T]: T[P] extends object ? DeepReadonly<T[P]> : T[P];
+  readonly [P in keyof T]: T[P] extends object 
+    ? DeepReadonly<T[P]> 
+    : T[P];
 };
 
-// Conditional mapped types
-type NonFunctionPropertyNames<T> = {
+type NonFunctionKeys<T> = {
   [K in keyof T]: T[K] extends Function ? never : K;
 }[keyof T];
 
-type NonFunctionProperties<T> = Pick<T, NonFunctionPropertyNames<T>>;
+type DataOnly<T> = Pick<T, NonFunctionKeys<T>>;
 
-// Key filtering
-type PickByType<T, U> = {
-  [K in keyof T as T[K] extends U ? K : never]: T[K];
+// 🔒 Security-focused utility types
+type SanitizedInput<T> = {
+  [K in keyof T]: T[K] extends string 
+    ? string  // All strings are sanitized
+    : T[K] extends number 
+    ? number  // Numbers are validated
+    : never;  // Reject other types
 };
 
-type StringProperties = PickByType<User, string>;
-// { name: string; email: string; }`,
-        },
-        {
-          title: "Type Guards and Narrowing",
-          description: "Runtime type checking and type narrowing techniques",
-          language: "typescript",
-          code: `// Type predicates
-function isString(value: unknown): value is string {
-  return typeof value === "string";
-}
+// ✅ Conditional types for API responses
+type ApiResponse<T> = T extends any[]
+  ? { data: T; total: number; page: number }
+  : { data: T };
 
-function isUser(obj: any): obj is User {
-  return obj &&
-         typeof obj.id === "number" &&
-         typeof obj.name === "string" &&
-         typeof obj.email === "string";
-}
+type UserListResponse = ApiResponse<User[]>;
+// Result: { data: User[]; total: number; page: number }
 
-// Using type guards
-function processValue(value: unknown) {
-  if (isString(value)) {
-    // value is narrowed to string
-    console.log(value.toUpperCase());
-  }
+type SingleUserResponse = ApiResponse<User>;
+// Result: { data: User }
 
-  if (isUser(value)) {
-    // value is narrowed to User
-    console.log(value.name);
-  }
-}
+// ⚡ Template literal magic for type safety
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+type ApiPath = '/users' | '/orders' | '/products';
+type ApiRoute = \`\${HttpMethod} \${ApiPath}\`;
 
-// Discriminated unions
-interface LoadingState {
-  status: "loading";
-}
+// Results in: 'GET /users' | 'POST /users' | 'PUT /users' | etc.
 
-interface SuccessState {
-  status: "success";
-  data: User[];
-}
+// ✅ Recursive type patterns (use carefully for performance)
+type NestedKeyOf<T> = {
+  [K in keyof T]: T[K] extends object 
+    ? K | \`\${string & K}.\${NestedKeyOf<T[K]>}\`
+    : K;
+}[keyof T];
 
-interface ErrorState {
-  status: "error";
-  message: string;
-}
+type UserProfilePaths = NestedKeyOf<UserProfile>;
+// Results in: 'id' | 'name' | 'preferences.theme' | 'preferences.notifications' | etc.
 
-type AsyncState = LoadingState | SuccessState | ErrorState;
-
-// Type narrowing with discriminated unions
-function handleState(state: AsyncState) {
-  switch (state.status) {
-    case "loading":
-      console.log("Loading...");
-      break;
-    case "success":
-      // state.data is available here
-      console.log(state.data.length);
-      break;
-    case "error":
-      // state.message is available here
-      console.log(state.message);
-      break;
-  }
-}
-
-// in operator narrowing
-type Fish = { swim: () => void };
-type Bird = { fly: () => void };
-
-function move(animal: Fish | Bird) {
-  if ("swim" in animal) {
-    animal.swim(); // animal is Fish
-  } else {
-    animal.fly(); // animal is Bird
-  }
-}
-
-// instanceof narrowing
-function processError(error: unknown) {
-  if (error instanceof Error) {
-    console.log(error.message); // error is Error
-  }
-}`,
+// 💡 ADVANCED PATTERNS:
+// - Use Pick/Omit for API boundary types
+// - Create custom utilities for repeated patterns  
+// - Template literals for compile-time validation
+// - Conditional types for polymorphic APIs
+// - Be careful with recursive types (compilation performance)`,
         },
       ],
     },
     {
-      id: "react",
-      title: "TypeScript with React",
-      description: "React components, hooks, and patterns with TypeScript",
+      id: "react-performance",
+      title: "React Performance Patterns",
+      description:
+        "Optimized React patterns • Hook performance • Component optimization • Memory management",
       examples: [
         {
-          title: "React Component Types",
-          description: "Typing React components, props, and children",
+          title: "High-Performance React Components",
+          description:
+            "Memo patterns • Callback optimization • Efficient prop drilling • Component splitting",
           language: "tsx",
-          code: `import React from 'react';
+          code: `import React, { memo, useMemo, useCallback, useState } from 'react';
 
-// Basic component props
-interface ButtonProps {
+// ⚡ PERFORMANCE: Memo for expensive components
+interface UserCardProps {
+  user: User;
+  onUserUpdate: (id: number, data: Partial<User>) => void;
+}
+
+const UserCard = memo<UserCardProps>(({ user, onUserUpdate }) => {
+  console.log('UserCard rendering for user:', user.id); // Only logs when props change
+  
+  // ✅ Stable callback reference
+  const handleUpdate = useCallback((data: Partial<User>) => {
+    onUserUpdate(user.id, data);
+  }, [user.id, onUserUpdate]);
+  
+  return (
+    <div className="user-card">
+      <h3>{user.name}</h3>
+      <p>{user.email}</p>
+      <button onClick={() => handleUpdate({ lastLogin: new Date() })}>
+        Update Login
+      </button>
+    </div>
+  );
+});
+
+// 🔒 SECURITY: Proper prop validation for components
+interface SafeProps {
   children: React.ReactNode;
-  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  variant?: "primary" | "secondary";
-  disabled?: boolean;
+  className?: string;
+  'data-testid'?: string;
 }
 
-// Function component with props
-const Button: React.FC<ButtonProps> = ({
-  children,
-  onClick,
-  variant = "primary",
-  disabled = false
-}) => {
-  return (
-    <button
-      className={\`btn btn-\${variant}\`}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {children}
-    </button>
-  );
-};
-
-// Component with generic props
-interface ListProps<T> {
-  items: T[];
-  renderItem: (item: T, index: number) => React.ReactNode;
-  keyExtractor: (item: T) => string | number;
-}
-
-function List<T>({ items, renderItem, keyExtractor }: ListProps<T>) {
-  return (
-    <ul>
-      {items.map((item, index) => (
-        <li key={keyExtractor(item)}>
-          {renderItem(item, index)}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-// Using the generic component
-const UserList = () => {
-  const users: User[] = [
-    { id: 1, name: "John", email: "john@example.com", createdAt: new Date() }
-  ];
-
-  return (
-    <List
-      items={users}
-      keyExtractor={(user) => user.id}
-      renderItem={(user) => <span>{user.name}</span>}
-    />
-  );
-};
-
-// Component with forwarded ref
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-  error?: string;
-}
-
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, ...props }, ref) => {
-    return (
-      <div>
-        <label>{label}</label>
-        <input ref={ref} {...props} />
-        {error && <span className="error">{error}</span>}
-      </div>
-    );
-  }
-);`,
-        },
-        {
-          title: "React Hooks with TypeScript",
-          description: "Typing React hooks for type-safe state management",
-          language: "tsx",
-          code: `import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-
-// useState with explicit types
-const UserComponent = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [users, setUsers] = useState<User[]>([]);
-
-  // useEffect with cleanup
-  useEffect(() => {
-    let isCancelled = false;
-
-    async function fetchUser() {
-      try {
-        const response = await fetch('/api/user');
-        const userData: User = await response.json();
-
-        if (!isCancelled) {
-          setUser(userData);
-        }
-      } catch (error) {
-        console.error('Failed to fetch user:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchUser();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, []);
-
-  // useCallback with proper typing
-  const handleUserUpdate = useCallback((updatedUser: Partial<User>) => {
-    setUser(prevUser => {
-      if (!prevUser) return null;
-      return { ...prevUser, ...updatedUser };
-    });
-  }, []);
-
-  // useMemo with computed values
-  const sortedUsers = useMemo(() => {
-    return users.sort((a, b) => a.name.localeCompare(b.name));
-  }, [users]);
-
-  // useRef with DOM elements
-  const inputRef = useRef<HTMLInputElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
-
-  const focusInput = () => {
-    inputRef.current?.focus();
+const SafeWrapper: React.FC<SafeProps> = ({ children, className, ...props }) => {
+  // Only allow specific props to prevent injection
+  const sanitizedProps = {
+    'data-testid': props['data-testid']
   };
-
+  
   return (
-    <div>
-      <input ref={inputRef} type="text" />
-      <button onClick={focusInput}>Focus Input</button>
+    <div className={className} {...sanitizedProps}>
+      {children}
     </div>
   );
 };
 
-// Custom hooks with TypeScript
+// ⚡ Generic list component with performance optimization
+interface ListProps<T> {
+  items: readonly T[];
+  renderItem: (item: T, index: number) => React.ReactNode;
+  keyExtractor: (item: T) => string | number;
+  className?: string;
+}
+
+function VirtualizedList<T>({ 
+  items, 
+  renderItem, 
+  keyExtractor, 
+  className 
+}: ListProps<T>) {
+  // ✅ Memoize expensive computations
+  const itemCount = useMemo(() => items.length, [items.length]);
+  
+  // ✅ Only render visible items for large lists
+  const visibleItems = useMemo(() => {
+    // In real implementation, calculate based on scroll position
+    return items.slice(0, 100); // Limit rendering for performance
+  }, [items]);
+  
+  return (
+    <div className={className} role="list">
+      {visibleItems.map((item, index) => (
+        <div key={keyExtractor(item)} role="listitem">
+          {renderItem(item, index)}
+        </div>
+      ))}
+      {itemCount > 100 && (
+        <div>... and {itemCount - 100} more items</div>
+      )}
+    </div>
+  );
+}
+
+// 💡 PERFORMANCE TIPS:
+// - Use React.memo for components that render frequently
+// - Memoize expensive calculations with useMemo
+// - Use useCallback for stable function references
+// - Split large components into smaller ones
+// - Implement virtualization for large lists`,
+        },
+        {
+          title: "Type-Safe React Hooks & State Management",
+          description:
+            "Hook optimization • State management • Custom hooks • Effect dependencies",
+          language: "tsx",
+          code: `import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+
+// ⚡ PERFORMANCE: Optimized state management
+interface UserState {
+  data: User | null;
+  loading: boolean;
+  error: string | null;
+}
+
+const UserProfile: React.FC<{ userId: number }> = ({ userId }) => {
+  const [state, setState] = useState<UserState>({
+    data: null,
+    loading: false,
+    error: null
+  });
+  
+  // ✅ Stable state updater functions
+  const setLoading = useCallback((loading: boolean) => {
+    setState(prev => ({ ...prev, loading }));
+  }, []);
+  
+  const setError = useCallback((error: string | null) => {
+    setState(prev => ({ ...prev, error, loading: false }));
+  }, []);
+  
+  const setUserData = useCallback((data: User | null) => {
+    setState(prev => ({ ...prev, data, loading: false, error: null }));
+  }, []);
+  
+  // ⚡ Efficient data fetching with cleanup
+  useEffect(() => {
+    let isCancelled = false;
+    
+    const fetchUser = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const response = await fetch(\`/api/users/\${userId}\`);
+        if (!response.ok) {
+          throw new Error(\`HTTP \${response.status}: \${response.statusText}\`);
+        }
+        
+        const userData: User = await response.json();
+        
+        if (!isCancelled) {
+          setUserData(userData);
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          setError(error instanceof Error ? error.message : 'Unknown error');
+        }
+      }
+    };
+    
+    fetchUser();
+    
+    return () => {
+      isCancelled = true;
+    };
+  }, [userId, setLoading, setError, setUserData]);
+  
+  // ✅ Memoized computed values
+  const userDisplayName = useMemo(() => {
+    if (!state.data) return 'Unknown User';
+    return \`\${state.data.name} (\${state.data.email})\`;
+  }, [state.data]);
+  
+  // ✅ Stable refs for DOM elements
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  const focusInput = useCallback(() => {
+    inputRef.current?.focus();
+  }, []);
+  
+  if (state.loading) return <div>Loading...</div>;
+  if (state.error) return <div>Error: {state.error}</div>;
+  if (!state.data) return <div>No user found</div>;
+  
+  return (
+    <div>
+      <h2>{userDisplayName}</h2>
+      <input ref={inputRef} placeholder="Search..." />
+      <button onClick={focusInput}>Focus Search</button>
+    </div>
+  );
+};
+
+// ✅ Custom hook with proper typing and optimization
 interface UseApiOptions {
   immediate?: boolean;
+  retries?: number;
 }
 
 interface UseApiReturn<T> {
@@ -626,401 +588,377 @@ interface UseApiReturn<T> {
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
+  reset: () => void;
 }
 
 function useApi<T>(
   url: string,
   options: UseApiOptions = {}
 ): UseApiReturn<T> {
+  const { immediate = true, retries = 0 } = options;
+  
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const fetchData = useCallback(async () => {
+  
+  const fetchData = useCallback(async (retryCount = 0) => {
     setLoading(true);
     setError(null);
-
+    
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(\`HTTP \${response.status}: \${response.statusText}\`);
+        throw new Error(\`HTTP \${response.status}\`);
       }
+      
       const result: T = await response.json();
       setData(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      
+      if (retryCount < retries) {
+        // Exponential backoff
+        setTimeout(() => fetchData(retryCount + 1), Math.pow(2, retryCount) * 1000);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
-  }, [url]);
-
+  }, [url, retries]);
+  
+  const reset = useCallback(() => {
+    setData(null);
+    setError(null);
+    setLoading(false);
+  }, []);
+  
   useEffect(() => {
-    if (options.immediate !== false) {
+    if (immediate) {
       fetchData();
     }
-  }, [fetchData, options.immediate]);
-
-  return { data, loading, error, refetch: fetchData };
-}`,
-        },
-        {
-          title: "React Context and Providers",
-          description: "Type-safe React Context with TypeScript",
-          language: "tsx",
-          code: `import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-
-// Auth context types
-interface AuthState {
-  user: User | null;
-  token: string | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
+  }, [fetchData, immediate]);
+  
+  return { data, loading, error, refetch: fetchData, reset };
 }
 
-type AuthAction =
-  | { type: 'LOGIN_START' }
-  | { type: 'LOGIN_SUCCESS'; payload: { user: User; token: string } }
-  | { type: 'LOGIN_FAILURE'; payload: string }
-  | { type: 'LOGOUT' }
-  | { type: 'SET_LOADING'; payload: boolean };
-
-interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  refreshToken: () => Promise<void>;
-}
-
-// Create context with undefined default (requires provider)
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Auth reducer
-function authReducer(state: AuthState, action: AuthAction): AuthState {
-  switch (action.type) {
-    case 'LOGIN_START':
-      return { ...state, isLoading: true };
-    case 'LOGIN_SUCCESS':
-      return {
-        ...state,
-        user: action.payload.user,
-        token: action.payload.token,
-        isAuthenticated: true,
-        isLoading: false,
-      };
-    case 'LOGIN_FAILURE':
-      return {
-        ...state,
-        user: null,
-        token: null,
-        isAuthenticated: false,
-        isLoading: false,
-      };
-    case 'LOGOUT':
-      return {
-        user: null,
-        token: null,
-        isAuthenticated: false,
-        isLoading: false,
-      };
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    default:
-      return state;
-  }
-}
-
-// Auth provider component
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, {
-    user: null,
-    token: null,
-    isLoading: false,
-    isAuthenticated: false,
-  });
-
-  const login = async (email: string, password: string): Promise<void> => {
-    dispatch({ type: 'LOGIN_START' });
-
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-
-      const { user, token } = await response.json();
-      dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
-    } catch (error) {
-      dispatch({ type: 'LOGIN_FAILURE', payload: 'Login failed' });
-      throw error;
-    }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    dispatch({ type: 'LOGOUT' });
-  };
-
-  const refreshToken = async (): Promise<void> => {
-    // Implementation here
-  };
-
-  const value: AuthContextType = {
-    ...state,
-    login,
-    logout,
-    refreshToken,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-// Custom hook for using auth context
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-// Usage in components
-const LoginForm: React.FC = () => {
-  const { login, isLoading } = useAuth();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await login('user@example.com', 'password');
-    } catch (error) {
-      console.error('Login failed:', error);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* Form implementation */}
-    </form>
-  );
-};`,
-        },
-        {
-          title: "Event Handlers and Form Types",
-          description: "Typing React events and form interactions",
-          language: "tsx",
-          code: `import React, { useState, ChangeEvent, FormEvent } from 'react';
-
-interface FormData {
-  name: string;
-  email: string;
-  age: number;
-  terms: boolean;
-}
-
-const ContactForm: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '',
-    age: 0,
-    terms: false,
-  });
-
-  // Input change handler
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = event.target;
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked :
-              type === 'number' ? Number(value) : value,
-    }));
-  };
-
-  // Select change handler
-  const handleSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = event.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  // Textarea change handler
-  const handleTextareaChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    const { name, value } = event.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  // Form submission handler
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        console.log('Form submitted successfully');
-      }
-    } catch (error) {
-      console.error('Submission failed:', error);
-    }
-  };
-
-  // Button click handlers
-  const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    console.log('Button clicked:', event.currentTarget.name);
-  };
-
-  const handleDivClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    console.log('Div clicked:', event.clientX, event.clientY);
-  };
-
-  // Keyboard event handler
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter' && event.ctrlKey) {
-      console.log('Ctrl+Enter pressed');
-    }
-  };
-
-  // Focus and blur handlers
-  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
-    console.log('Input focused:', event.target.name);
-  };
-
-  const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
-    console.log('Input blurred:', event.target.name);
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        name="name"
-        value={formData.name}
-        onChange={handleInputChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        placeholder="Your name"
-      />
-
-      <input
-        type="email"
-        name="email"
-        value={formData.email}
-        onChange={handleInputChange}
-        placeholder="Your email"
-      />
-
-      <input
-        type="number"
-        name="age"
-        value={formData.age}
-        onChange={handleInputChange}
-        placeholder="Your age"
-      />
-
-      <label>
-        <input
-          type="checkbox"
-          name="terms"
-          checked={formData.terms}
-          onChange={handleInputChange}
-        />
-        I agree to the terms
-      </label>
-
-      <button type="submit">Submit</button>
-      <button type="button" onClick={handleButtonClick}>
-        Cancel
-      </button>
-    </form>
-  );
-};
-
-// Generic event handler type
-type EventHandler<T = HTMLElement> = (event: React.MouseEvent<T>) => void;
-
-interface IconButtonProps {
-  icon: React.ComponentType;
-  onClick: EventHandler<HTMLButtonElement>;
-  disabled?: boolean;
-}
-
-const IconButton: React.FC<IconButtonProps> = ({ icon: Icon, onClick, disabled }) => {
-  return (
-    <button onClick={onClick} disabled={disabled}>
-      <Icon />
-    </button>
-  );
-};`,
+// 💡 REACT PERFORMANCE BEST PRACTICES:
+// - Use useCallback for stable function references
+// - Use useMemo for expensive computations
+// - Include all dependencies in effect arrays
+// - Use refs for DOM manipulation
+// - Implement proper cleanup in useEffect`,
         },
       ],
     },
     {
-      id: "config",
-      title: "Configuration & Tools",
-      description: "TypeScript configuration, tooling, and development setup",
+      id: "error-handling",
+      title: "Error Handling & Robustness",
+      description:
+        "Type-safe error handling • Validation patterns • Defensive programming • Result types",
       examples: [
         {
-          title: "tsconfig.json Configuration",
-          description: "Essential TypeScript compiler configuration options",
-          language: "json",
-          code: `{
+          title: "Strategic Error Handling Patterns",
+          description:
+            "Result types • Error boundaries • Validation chains • Defensive coding",
+          language: "typescript",
+          code: `// ✅ Result type pattern for type-safe error handling
+type Result<T, E = Error> = 
+  | { success: true; data: T }
+  | { success: false; error: E };
+
+// 🔒 SECURITY: Comprehensive input validation
+interface UserRegistrationData {
+  username: string;
+  email: string;
+  password: string;
+  age: number;
+}
+
+function validateUserRegistration(input: unknown): Result<UserRegistrationData, string> {
+  if (!input || typeof input !== 'object') {
+    return { success: false, error: 'Invalid input format' };
+  }
+  
+  const data = input as Record<string, unknown>;
+  
+  // Username validation
+  if (typeof data.username !== 'string' || data.username.length < 3) {
+    return { success: false, error: 'Username must be at least 3 characters' };
+  }
+  
+  // Email validation
+  if (typeof data.email !== 'string' || !data.email.includes('@')) {
+    return { success: false, error: 'Invalid email format' };
+  }
+  
+  // Password validation
+  if (typeof data.password !== 'string' || data.password.length < 8) {
+    return { success: false, error: 'Password must be at least 8 characters' };
+  }
+  
+  // Age validation
+  if (typeof data.age !== 'number' || data.age < 13 || data.age > 120) {
+    return { success: false, error: 'Age must be between 13 and 120' };
+  }
+  
+  return {
+    success: true,
+    data: {
+      username: data.username.trim().toLowerCase(),
+      email: data.email.trim().toLowerCase(),
+      password: data.password,
+      age: data.age
+    }
+  };
+}
+
+// ✅ Safe API call with comprehensive error handling
+async function safeApiCall<T>(
+  url: string,
+  options?: RequestInit
+): Promise<Result<T, string>> {
+  try {
+    const response = await fetch(url, options);
+    
+    if (!response.ok) {
+      // Handle different HTTP error codes
+      switch (response.status) {
+        case 401:
+          return { success: false, error: 'Unauthorized - please log in' };
+        case 403:
+          return { success: false, error: 'Forbidden - insufficient permissions' };
+        case 404:
+          return { success: false, error: 'Resource not found' };
+        case 429:
+          return { success: false, error: 'Rate limit exceeded - try again later' };
+        case 500:
+          return { success: false, error: 'Server error - please try again' };
+        default:
+          return { success: false, error: \`HTTP \${response.status}: \${response.statusText}\` };
+      }
+    }
+    
+    const data: T = await response.json();
+    return { success: true, data };
+    
+  } catch (error) {
+    if (error instanceof TypeError) {
+      return { success: false, error: 'Network error - check your connection' };
+    }
+    
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error occurred' 
+    };
+  }
+}
+
+// ✅ Chain operations safely with Result type
+async function registerUser(rawInput: unknown): Promise<Result<User, string>> {
+  // Step 1: Validate input
+  const validationResult = validateUserRegistration(rawInput);
+  if (!validationResult.success) {
+    return validationResult;
+  }
+  
+  // Step 2: Check if user exists
+  const checkResult = await safeApiCall<{ exists: boolean }>(\`/api/users/exists?username=\${validationResult.data.username}\`);
+  if (!checkResult.success) {
+    return checkResult;
+  }
+  
+  if (checkResult.data.exists) {
+    return { success: false, error: 'Username already exists' };
+  }
+  
+  // Step 3: Create user
+  const createResult = await safeApiCall<User>('/api/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(validationResult.data)
+  });
+  
+  return createResult;
+}
+
+// ✅ Usage with proper error handling
+async function handleUserRegistration(formData: FormData) {
+  const result = await registerUser(Object.fromEntries(formData));
+  
+  if (result.success) {
+    console.log('User created successfully:', result.data);
+    // Redirect to success page
+  } else {
+    console.error('Registration failed:', result.error);
+    // Show error message to user
+  }
+}
+
+// 💡 ERROR HANDLING BEST PRACTICES:
+// - Use Result types instead of throwing exceptions
+// - Validate all external input
+// - Provide specific error messages
+// - Handle different error types appropriately
+// - Chain operations safely with early returns`,
+        },
+      ],
+    },
+    {
+      id: "testing-development",
+      title: "Testing & Development Workflow",
+      description:
+        "Type-safe testing • Development tooling • Debugging patterns • Production optimization",
+      examples: [
+        {
+          title: "Strategic Testing with TypeScript",
+          description:
+            "Type-safe tests • Mock patterns • Test utilities • Coverage strategies",
+          language: "typescript",
+          code: `// ✅ Type-safe test utilities
+interface TestUser {
+  id: number;
+  name: string;
+  email: string;
+  role: 'admin' | 'user';
+}
+
+// Test data factories with types
+function createTestUser(overrides: Partial<TestUser> = {}): TestUser {
+  return {
+    id: 1,
+    name: 'Test User',
+    email: 'test@example.com',
+    role: 'user',
+    ...overrides
+  };
+}
+
+// ✅ Mock function types for testing
+type MockApiFunction = jest.MockedFunction<typeof fetch>;
+
+describe('User API', () => {
+  let mockFetch: MockApiFunction;
+  
+  beforeEach(() => {
+    mockFetch = fetch as MockApiFunction;
+    mockFetch.mockClear();
+  });
+  
+  it('should handle successful user creation', async () => {
+    const testUser = createTestUser({ name: 'Alice' });
+    
+    // Type-safe mock response
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => testUser,
+    } as Response);
+    
+    const result = await registerUser({
+      username: 'alice',
+      email: 'alice@example.com',
+      password: 'password123',
+      age: 25
+    });
+    
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.name).toBe('Alice');
+    }
+  });
+  
+  it('should handle validation errors', async () => {
+    const result = await registerUser({
+      username: 'ab', // Too short
+      email: 'invalid-email',
+      password: '123',
+      age: 10
+    });
+    
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toContain('Username must be at least 3 characters');
+    }
+  });
+});
+
+// ✅ Custom test assertions with TypeScript
+function assertIsSuccess<T>(result: Result<T, string>): asserts result is { success: true; data: T } {
+  if (!result.success) {
+    throw new Error(\`Expected success but got error: \${result.error}\`);
+  }
+}
+
+function assertIsError<T>(result: Result<T, string>): asserts result is { success: false; error: string } {
+  if (result.success) {
+    throw new Error('Expected error but got success');
+  }
+}
+
+// Usage in tests
+it('should create user successfully', async () => {
+  const result = await registerUser(validUserData);
+  assertIsSuccess(result);
+  
+  // Now TypeScript knows result.data exists
+  expect(result.data.id).toBeGreaterThan(0);
+});
+
+// 💡 TESTING BEST PRACTICES:
+// - Use type-safe test utilities
+// - Create typed mock functions
+// - Test both success and error cases
+// - Use custom assertions for common patterns
+// - Maintain test data factories with types`,
+        },
+        {
+          title: "Production-Ready TypeScript Configuration",
+          description:
+            "Optimal tsconfig • Build optimization • Development workflow • Performance monitoring",
+          language: "typescript",
+          code: `// tsconfig.json - Production-optimized configuration
+{
   "compilerOptions": {
-    // Basic options
+    // ⚡ PERFORMANCE: Core compilation options
     "target": "ES2022",
-    "module": "ESNext",
+    "module": "ESNext", 
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "moduleResolution": "bundler",
     "allowJs": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true, // Skip .d.ts files for faster compilation
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-
-    // Module resolution
-    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
 
-    // Advanced options
-    "incremental": true,
+    // 🔒 SECURITY: Strict type checking options
+    "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "exactOptionalPropertyTypes": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
+    "noUncheckedIndexedAccess": true, // Prevents array access without bounds checking
 
-    // Path mapping
+    // ⚡ PERFORMANCE: Path mapping for faster imports
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
       "@/components/*": ["src/components/*"],
-      "@/types/*": ["src/types/*"],
-      "@/utils/*": ["src/utils/*"]
+      "@/hooks/*": ["src/hooks/*"],
+      "@/utils/*": ["src/utils/*"],
+      "@/types/*": ["src/types/*"]
     },
 
-    // JSX configuration
+    // React configuration
     "jsx": "react-jsx",
     "jsxImportSource": "react",
 
-    // Output
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true
+    // Build optimization
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
 
   "include": [
@@ -1034,300 +972,109 @@ const IconButton: React.FC<IconButtonProps> = ({ icon: Icon, onClick, disabled }
     "dist",
     "build",
     "**/*.test.ts",
-    "**/*.test.tsx"
-  ],
-
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS"
-    }
-  }
-}`,
-        },
-        {
-          title: "ESLint + TypeScript Configuration",
-          description:
-            "ESLint setup for TypeScript projects with recommended rules",
-          language: "json",
-          code: `// .eslintrc.json
-{
-  "env": {
-    "browser": true,
-    "es2022": true,
-    "node": true
-  },
-  "extends": [
-    "eslint:recommended",
-    "@typescript-eslint/recommended",
-    "@typescript-eslint/recommended-requiring-type-checking",
-    "prettier"
-  ],
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaVersion": "latest",
-    "sourceType": "module",
-    "project": ["./tsconfig.json"],
-    "tsconfigRootDir": "__dirname"
-  },
-  "plugins": ["@typescript-eslint"],
-  "rules": {
-    // TypeScript specific rules
-    "@typescript-eslint/no-unused-vars": "error",
-    "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/no-inferrable-types": "off",
-    "@typescript-eslint/prefer-nullish-coalescing": "error",
-    "@typescript-eslint/prefer-optional-chain": "error",
-    "@typescript-eslint/no-non-null-assertion": "warn",
-
-    // General rules
-    "prefer-const": "error",
-    "no-var": "error",
-    "object-shorthand": "error",
-    "prefer-template": "error"
-  },
-  "overrides": [
-    {
-      "files": ["*.js"],
-      "rules": {
-        "@typescript-eslint/no-var-requires": "off"
-      }
-    }
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
   ]
 }
 
-// package.json scripts
-{
-  "scripts": {
-    "lint": "eslint . --ext .ts,.tsx",
-    "lint:fix": "eslint . --ext .ts,.tsx --fix",
-    "type-check": "tsc --noEmit"
-  }
-}`,
-        },
-        {
-          title: "Type Declarations and Ambient Modules",
-          description:
-            "Creating and managing type declarations for external libraries",
-          language: "typescript",
-          code: `// types/global.d.ts - Global type declarations
-declare global {
-  interface Window {
-    gtag: (command: string, targetId: string, config?: object) => void;
-    dataLayer: any[];
-  }
-
-  namespace NodeJS {
-    interface ProcessEnv {
-      NODE_ENV: 'development' | 'production' | 'test';
-      NEXT_PUBLIC_API_URL: string;
-      DATABASE_URL: string;
-      JWT_SECRET: string;
-    }
-  }
-}
-
-export {};
-
-// types/modules.d.ts - Module declarations
-declare module '*.svg' {
-  const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
-  export default content;
-}
-
-declare module '*.png' {
-  const value: string;
-  export default value;
-}
-
-declare module '*.jpg' {
-  const value: string;
-  export default value;
-}
-
-declare module 'my-untyped-library' {
-  export interface LibraryConfig {
-    apiKey: string;
-    timeout?: number;
-  }
-
-  export class LibraryClient {
-    constructor(config: LibraryConfig);
-    getData(id: string): Promise<any>;
-  }
-
-  export function createClient(config: LibraryConfig): LibraryClient;
-}
-
-// types/api.d.ts - API type declarations
-declare namespace API {
-  interface BaseResponse {
-    success: boolean;
-    message?: string;
-    timestamp: string;
-  }
-
-  interface PaginatedResponse<T> extends BaseResponse {
-    data: T[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      hasNext: boolean;
-      hasPrev: boolean;
-    };
-  }
-
-  interface ErrorResponse extends BaseResponse {
-    success: false;
-    error: {
-      code: string;
-      details?: Record<string, any>;
-    };
-  }
-
-  namespace Users {
-    interface GetUsersResponse extends PaginatedResponse<User> {}
-
-    interface CreateUserRequest {
-      name: string;
-      email: string;
-      role?: UserRole;
-    }
-
-    interface CreateUserResponse extends BaseResponse {
-      data: User;
-    }
-  }
-}
-
-// Usage with ambient module augmentation
-declare module 'express-serve-static-core' {
-  interface Request {
-    user?: {
-      id: string;
-      role: string;
-    };
-  }
-}`,
-        },
-        {
-          title: "Development Tools and Debugging",
-          description:
-            "TypeScript debugging, testing setup, and development utilities",
-          language: "typescript",
-          code: `// Development environment setup
+// ✅ Development environment setup
 const isDevelopment = process.env.NODE_ENV === 'development';
 const isProduction = process.env.NODE_ENV === 'production';
 
 // Type-safe environment variables
-const config = {
-  apiUrl: process.env.NEXT_PUBLIC_API_URL!,
-  dbUrl: process.env.DATABASE_URL!,
-  jwtSecret: process.env.JWT_SECRET!,
-} as const;
+interface EnvironmentConfig {
+  readonly API_URL: string;
+  readonly APP_VERSION: string;
+  readonly DEBUG_MODE: boolean;
+}
 
-// Assertion functions for debugging
-function assertIsString(value: unknown): asserts value is string {
-  if (typeof value !== 'string') {
-    throw new Error(\`Expected string, got \${typeof value}\`);
+function getEnvironmentConfig(): EnvironmentConfig {
+  const apiUrl = process.env.REACT_APP_API_URL;
+  const appVersion = process.env.REACT_APP_VERSION || '1.0.0';
+  const debugMode = process.env.REACT_APP_DEBUG === 'true';
+
+  if (!apiUrl) {
+    throw new Error('REACT_APP_API_URL environment variable is required');
+  }
+
+  return {
+    API_URL: apiUrl,
+    APP_VERSION: appVersion,
+    DEBUG_MODE: debugMode
+  };
+}
+
+export const config = getEnvironmentConfig();
+
+// ✅ Performance monitoring utility
+interface PerformanceEntry {
+  name: string;
+  duration: number;
+  timestamp: number;
+}
+
+class PerformanceMonitor {
+  private entries: PerformanceEntry[] = [];
+
+  measure<T>(name: string, fn: () => T): T {
+    const start = performance.now();
+    const result = fn();
+    const duration = performance.now() - start;
+
+    this.entries.push({
+      name,
+      duration,
+      timestamp: Date.now()
+    });
+
+    if (config.DEBUG_MODE && duration > 100) {
+      console.warn(\`Slow operation detected: \${name} took \${duration.toFixed(2)}ms\`);
+    }
+
+    return result;
+  }
+
+  getReport(): PerformanceEntry[] {
+    return [...this.entries];
+  }
+
+  clearEntries(): void {
+    this.entries = [];
   }
 }
 
-function assertIsUser(value: unknown): asserts value is User {
-  if (!value || typeof value !== 'object') {
-    throw new Error('Expected user object');
-  }
+export const performanceMonitor = new PerformanceMonitor();
 
-  const user = value as Record<string, unknown>;
-  if (typeof user.id !== 'number' || typeof user.name !== 'string') {
-    throw new Error('Invalid user object structure');
-  }
-}
-
-// Debug utility function
-function debugLog<T>(label: string, value: T): T {
-  if (isDevelopment) {
-    console.group(\`🐛 \${label}\`);
-    console.log('Type:', typeof value);
-    console.log('Value:', value);
-    console.groupEnd();
-  }
-  return value;
-}
-
-// Type-safe fetch wrapper
-async function apiRequest<T>(
-  url: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const response = await fetch(\`\${config.apiUrl}\${url}\`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
+// ✅ Development debugging utilities
+function createLogger(prefix: string) {
+  return {
+    debug: (message: string, ...args: any[]) => {
+      if (config.DEBUG_MODE) {
+        console.debug(\`[\${prefix}] \${message}\`, ...args);
+      }
     },
-    ...options,
-  });
-
-  if (!response.ok) {
-    throw new Error(\`API Error: \${response.status} \${response.statusText}\`);
-  }
-
-  const data = await response.json();
-  return data as T;
-}
-
-// Testing utilities with TypeScript
-// jest.config.js setup for TypeScript
-export default {
-  preset: 'ts-jest',
-  testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
-  moduleNameMapping: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-  },
-  transform: {
-    '^.+\\\\.tsx?$': 'ts-jest',
-  },
-  collectCoverageFrom: [
-    'src/**/*.{ts,tsx}',
-    '!src/**/*.d.ts',
-    '!src/test/**/*',
-  ],
-};
-
-// Type-safe test utilities
-interface RenderOptions {
-  preloadedState?: Partial<AppState>;
-  route?: string;
-}
-
-function renderWithProviders(
-  ui: React.ReactElement,
-  options: RenderOptions = {}
-) {
-  // Test rendering implementation
-}
-
-// Mock type definitions for testing
-type MockFunction<T extends (...args: any[]) => any> = jest.MockedFunction<T>;
-
-const mockApiRequest = apiRequest as MockFunction<typeof apiRequest>;
-
-// TypeScript compiler API usage
-import * as ts from 'typescript';
-
-function checkTypeScript(fileName: string, source: string) {
-  const result = ts.transpileModule(source, {
-    compilerOptions: {
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2020,
+    info: (message: string, ...args: any[]) => {
+      console.info(\`[\${prefix}] \${message}\`, ...args);
     },
-  });
+    warn: (message: string, ...args: any[]) => {
+      console.warn(\`[\${prefix}] \${message}\`, ...args);
+    },
+    error: (message: string, ...args: any[]) => {
+      console.error(\`[\${prefix}] \${message}\`, ...args);
+    }
+  };
+}
 
-  return result.outputText;
-}`,
+export const logger = createLogger('App');
+
+// 💡 PRODUCTION BEST PRACTICES:
+// - Enable all strict TypeScript options
+// - Use path mapping for cleaner imports
+// - Set up performance monitoring
+// - Configure proper build optimization
+// - Implement type-safe environment configuration
+// - Use incremental compilation for faster builds`,
         },
       ],
     },

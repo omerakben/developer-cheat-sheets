@@ -3,13 +3,13 @@ import { CheatSheet } from "@/types/cheatsheet";
 export const typescriptCheatSheet: CheatSheet = {
   title: "TypeScript Cheat Sheet",
   description:
-    "Strategic TypeScript guide for mid-level developers • Type safety first • Performance patterns • Production best practices",
+    "Strategic TypeScript guide for mid-level developers • Security-first approach • Performance patterns • Best practices",
   sections: [
-    {
-      id: "essentials-security",
-      title: "TypeScript Essentials & Security",
-      description:
-        "Type safety first approach • Runtime validation • Input sanitization • Secure coding patterns",
+      {
+        id: "essentials-security",
+        title: "TypeScript Essentials & Security",
+        description:
+          "Core concepts with security-first approach • Type safety • Runtime validation • Secure coding patterns",
       examples: [
         {
           title: "Type Safety & Runtime Validation",
@@ -65,7 +65,8 @@ function createEmail(email: string): Email | null {
 
 // 💡 WHEN TO USE: Type guards are essential for API data, user input, and any external sources
 // 💡 WHY: Prevents runtime errors and security vulnerabilities
-// 💡 COMMON MISTAKE: Trusting external data without validation`,
+// 💡 COMMON MISTAKE: Trusting external data without validation
+// 💡 PRODUCTION TIPS: Always log validation failures for monitoring`,
         },
         {
           title: "Input Sanitization & Secure String Handling",
@@ -147,10 +148,11 @@ function validateFilePath(userPath: string): string | null {
 }
 
 // 💡 SECURITY BEST PRACTICES:
-// - Always sanitize user input before processing
-// - Use branded types for sensitive data
-// - Validate domains and paths to prevent attacks
-// - Never trust external data without validation`,
+// - Always sanitize user input before processing or storing
+// - Use branded types for sensitive data that needs validation
+// - Validate domains and file paths to prevent traversal attacks
+// - Never trust external data without proper validation
+// - Log all security violations for monitoring and incident response`,
         },
         {
           title: "Numbers & Type-Safe Math Operations",
@@ -255,9 +257,10 @@ function validateRange(value: number, min: number, max: number): boolean {
 }
 
 // 💡 WHEN TO USE:
-// - Branded types: Financial calculations, IDs, measurements
-// - SafeMath: Any user-input arithmetic operations
-// - Range validation: Age, scores, percentages, quantities`,
+// - Branded types: Financial calculations, IDs, measurements, sensitive data
+// - SafeMath: Any user-input arithmetic operations to prevent overflow
+// - Range validation: Age, scores, percentages, quantities, user inputs
+// - Money class: All financial calculations to prevent precision errors`,
         },
       ],
     },
@@ -354,16 +357,16 @@ const emailSet = new TypedSet<string>(
 );
 
 // 💡 PERFORMANCE COMPARISON:
-// Array.includes(): O(n) - linear search
-// Set.has(): O(1) - hash lookup  
-// Map.get(): O(1) - hash lookup
-// Object property access: O(1) - but limited to string keys
+// Array.includes(): O(n) - linear search, slow for large datasets
+// Set.has(): O(1) - hash lookup, fast even for large datasets  
+// Map.get(): O(1) - hash lookup, efficient key-value operations
+// Object property access: O(1) - but limited to string/symbol keys
 
 // 💡 WHEN TO USE:
-// - Array: Need indexing, ordered data, frequent iteration
-// - Set: Membership testing, removing duplicates, unique collections
-// - Map: Key-value pairs with non-string keys, frequent lookups
-// - WeakMap/WeakSet: When you need garbage collection of keys`,
+// - Array: Need indexing, ordered data, frequent iteration, small datasets
+// - Set: Membership testing, removing duplicates, unique collections, fast lookups
+// - Map: Key-value pairs with non-string keys, frequent lookups, complex keys
+// - WeakMap/WeakSet: When you need garbage collection of keys for memory management`,
         },
         {
           title: "Type-Safe Object Manipulation",
@@ -483,9 +486,10 @@ function safeAssign<T extends Record<string, unknown>>(
 
 // 💡 BEST PRACTICES:
 // - Always validate object properties from external sources
-// - Use readonly types for immutable data structures
-// - Prefer immutable updates over mutations
-// - Protect against prototype pollution attacks`,
+// - Use readonly types for immutable data structures and shared state
+// - Prefer immutable updates over mutations for predictable state changes
+// - Protect against prototype pollution attacks in user-facing applications
+// - Use type guards for runtime safety when dealing with unknown objects`,
         },
       ],
     },
@@ -593,11 +597,11 @@ function isNotificationsEnabled(data: NestedData): boolean {
 }
 
 // 💡 DEFENSIVE PROGRAMMING:
-// - Validate inputs at function boundaries
-// - Use discriminated unions for complex state
-// - Handle all possible cases with never type
-// - Use optional chaining for nested properties
-// - Always provide sensible defaults`,
+// - Validate inputs at function boundaries to catch errors early
+// - Use discriminated unions for complex state management
+// - Handle all possible cases with never type for exhaustive checking
+// - Use optional chaining for nested properties to prevent runtime errors
+// - Always provide sensible defaults to ensure graceful degradation`,
         },
         {
           title: "Async Patterns & Error Handling",
@@ -727,11 +731,11 @@ const operation = new CancellableOperation(async (signal) => {
 setTimeout(() => operation.cancel(), 5000);
 
 // 💡 ASYNC BEST PRACTICES:
-// - Always handle both success and error cases
-// - Use timeouts for external operations
-// - Aggregate errors in parallel operations
-// - Use async iterators for streaming data
-// - Implement cancellation for long-running operations`,
+// - Always handle both success and error cases explicitly
+// - Use timeouts for external operations to prevent hanging
+// - Aggregate errors in parallel operations for better debugging
+// - Use async iterators for streaming data to manage memory efficiently
+// - Implement cancellation for long-running operations to improve UX`,
         },
       ],
     },
@@ -873,10 +877,10 @@ const userValidator = createValidator<User>(
 );
 
 // 💡 WHEN TO USE:
-// - Pure functions: Calculations, transformations, business logic
-// - Function composition: Complex data processing pipelines
-// - Higher-order functions: Cross-cutting concerns like retry, caching
-// - Currying: Configuration, specialized validators`,
+// - Pure functions: Calculations, transformations, business logic that doesn't depend on external state
+// - Function composition: Complex data processing pipelines that need to be maintainable
+// - Higher-order functions: Cross-cutting concerns like retry, caching, logging, validation
+// - Currying: Configuration, specialized validators, and creating reusable function factories`,
         },
         {
           title: "Exception Handling & Result Types",
@@ -1031,11 +1035,11 @@ class ResourceManager<T> {
 }
 
 // 💡 ERROR HANDLING STRATEGY:
-// - Use Result types for operations that can fail
-// - Create domain-specific error classes
-// - Never fail silently - always log errors
-// - Implement proper cleanup in finally blocks
-// - Use assertions for development-time checks`,
+// - Use Result types for operations that can fail gracefully
+// - Create domain-specific error classes for better debugging and handling
+// - Never fail silently - always log errors with context for monitoring
+// - Implement proper cleanup in finally blocks to prevent resource leaks
+// - Use assertions for development-time checks to catch bugs early`,
         },
       ],
     },
@@ -1180,10 +1184,10 @@ const userQuery = new QueryBuilder<User>()
   .limit(10);
 
 // 💡 ADVANCED PATTERNS:
-// - Use conditional types for flexible APIs
-// - Template literals for type-safe string operations
-// - Builder pattern for complex object construction
-// - Event systems with strict payload typing`,
+// - Use conditional types for flexible APIs that adapt to input types
+// - Template literals for type-safe string operations and domain-specific languages
+// - Builder pattern for complex object construction with method chaining
+// - Event systems with strict payload typing for type-safe communication`,
         },
         {
           title: "Performance & Memory Optimization",
@@ -1369,11 +1373,11 @@ class OptimizedArray<T> {
 }
 
 // 💡 PERFORMANCE OPTIMIZATION:
-// - Use type-only imports to reduce bundle size
-// - Implement lazy loading for large modules
-// - Use appropriate caching strategies (LRU, Weak)
-// - Consider object pooling for frequent allocations
-// - Optimize collection operations for your use case`,
+// - Use type-only imports to reduce bundle size and improve build times
+// - Implement lazy loading for large modules to improve initial load performance
+// - Use appropriate caching strategies (LRU, Weak) based on memory constraints
+// - Consider object pooling for frequent allocations in performance-critical code
+// - Optimize collection operations for your specific use case and data patterns`,
         },
       ],
     },
@@ -1559,11 +1563,11 @@ describe("User validation", () => {
 });
 
 // 💡 TESTING BEST PRACTICES:
-// - Create type-safe test utilities and fixtures
-// - Mock external dependencies with proper typing
-// - Test both success and error conditions
-// - Use property-based testing for validation logic
-// - Test edge cases and boundary conditions`,
+// - Create type-safe test utilities and fixtures for consistent testing
+// - Mock external dependencies with proper typing to maintain type safety
+// - Test both success and error conditions to ensure robustness
+// - Use property-based testing for validation logic to catch edge cases
+// - Test edge cases and boundary conditions that might be missed in manual testing`,
         },
         {
           title: "Debugging & Error Investigation",
@@ -1774,11 +1778,11 @@ const profiledOperation = () => PerformanceProfiler.profile('userData', () => {
 });
 
 // 💡 DEBUGGING STRATEGIES:
-// - Use structured logging with context
-// - Profile performance-critical functions
-// - Capture errors with full context information
-// - Use type-safe debug utilities in development
-// - Monitor and track errors in production`,
+// - Use structured logging with context for better error tracking
+// - Profile performance-critical functions to identify bottlenecks
+// - Capture errors with full context information for effective debugging
+// - Use type-safe debug utilities in development to maintain type safety
+// - Monitor and track errors in production for continuous improvement`,
         },
       ],
     },

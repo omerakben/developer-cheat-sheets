@@ -16,7 +16,7 @@ export const typescriptCheatSheet: CheatSheet = {
           description:
             "Strong typing for maintainability • Runtime validation prevents errors • Essential for production • Prevents injection attacks",
           language: "typescript",
-          code: `// ✅ Strong typing with validation - ALWAYS use in production
+          code: `// RECOMMENDED: Strong typing with validation - ALWAYS use in production
 interface User {
   readonly id: number;
   name: string;
@@ -25,7 +25,7 @@ interface User {
   createdAt: Date;
 }
 
-// ✅ Type guards for runtime validation
+// RECOMMENDED: Type guards for runtime validation
 function isValidUser(obj: unknown): obj is User {
   return typeof obj === "object" && 
          obj !== null &&
@@ -35,7 +35,7 @@ function isValidUser(obj: unknown): obj is User {
          ["admin", "user", "guest"].includes((obj as User).role);
 }
 
-// 🔒 SECURITY: Always validate external data
+// SECURITY: SECURITY: Always validate external data
 function processUserData(userData: unknown): User | null {
   if (!isValidUser(userData)) {
     console.error("Invalid user data received");
@@ -51,7 +51,7 @@ function processUserData(userData: unknown): User | null {
   return userData;
 }
 
-// ✅ Branded types for additional safety
+// RECOMMENDED: Branded types for additional safety
 type UserId = number & { readonly brand: unique symbol };
 type Email = string & { readonly brand: unique symbol };
 
@@ -63,17 +63,17 @@ function createEmail(email: string): Email | null {
   return email.includes("@") && email.length >= 5 ? email as Email : null;
 }
 
-// 💡 WHEN TO USE: Type guards are essential for API data, user input, and any external sources
-// 💡 WHY: Prevents runtime errors and security vulnerabilities
-// 💡 COMMON MISTAKE: Trusting external data without validation
-// 💡 PRODUCTION TIPS: Always log validation failures for monitoring`,
+// TIP: WHEN TO USE: Type guards are essential for API data, user input, and any external sources
+// TIP: WHY: Prevents runtime errors and security vulnerabilities
+// TIP: COMMON MISTAKE: Trusting external data without validation
+// TIP: PRODUCTION TIPS: Always log validation failures for monitoring`,
         },
         {
           title: "Input Sanitization & Secure String Handling",
           description:
             "Sanitize all user input • Prevent XSS attacks • Use template literals safely • Validate and escape content",
           language: "typescript",
-          code: `// 🔒 SECURITY: Input sanitization functions
+          code: `// SECURITY: SECURITY: Input sanitization functions
 function sanitizeHtmlInput(input: string): string {
   return input
     .replace(/&/g, "&amp;")
@@ -91,7 +91,7 @@ function sanitizeUsername(username: string): string | null {
   return isValid ? cleaned : null;
 }
 
-// ✅ Safe string operations with validation
+// RECOMMENDED: Safe string operations with validation
 class SafeString {
   private constructor(private readonly value: string) {}
   
@@ -111,7 +111,7 @@ class SafeString {
   }
 }
 
-// ✅ Template literal type safety
+// RECOMMENDED: Template literal type safety
 type AllowedDomains = "example.com" | "test.com" | "myapp.com";
 type EmailAddress<T extends AllowedDomains> = \`\${string}@\${T}\`;
 
@@ -134,7 +134,7 @@ function sendEmail<T extends AllowedDomains>(
   return true;
 }
 
-// 🔒 Path traversal prevention
+// SECURITY: Path traversal prevention
 function validateFilePath(userPath: string): string | null {
   // Prevent directory traversal
   if (userPath.includes("..") || userPath.includes("~") || userPath.startsWith("/")) {
@@ -147,7 +147,7 @@ function validateFilePath(userPath: string): string | null {
   return sanitized.length > 0 ? sanitized : null;
 }
 
-// 💡 SECURITY BEST PRACTICES:
+// TIP: SECURITY BEST PRACTICES:
 // - Always sanitize user input before processing or storing
 // - Use branded types for sensitive data that needs validation
 // - Validate domains and file paths to prevent traversal attacks
@@ -159,7 +159,7 @@ function validateFilePath(userPath: string): string | null {
           description:
             "Handle numbers safely • Prevent overflow/underflow • Use appropriate numeric types • Validate arithmetic operations",
           language: "typescript",
-          code: `// ⚡ Type-safe numeric operations
+          code: `// PERFORMANCE: Type-safe numeric operations
 type SafeInteger = number & { readonly __brand: "SafeInteger" };
 type PositiveNumber = number & { readonly __brand: "PositiveNumber" };
 type Percentage = number & { readonly __brand: "Percentage" };
@@ -185,7 +185,7 @@ function createPercentage(value: number): Percentage | null {
   return value as Percentage;
 }
 
-// ✅ Safe arithmetic operations
+// RECOMMENDED: Safe arithmetic operations
 class SafeMath {
   static divide(a: number, b: number): number | null {
     if (b === 0 || !Number.isFinite(a) || !Number.isFinite(b)) {
@@ -214,7 +214,7 @@ class SafeMath {
   }
 }
 
-// 🔒 Financial calculations with precision
+// SECURITY: Financial calculations with precision
 class Money {
   private readonly cents: SafeInteger;
   
@@ -248,7 +248,7 @@ class Money {
   }
 }
 
-// ✅ Range validation
+// RECOMMENDED: Range validation
 function validateRange(value: number, min: number, max: number): boolean {
   return typeof value === "number" && 
          Number.isFinite(value) && 
@@ -256,7 +256,7 @@ function validateRange(value: number, min: number, max: number): boolean {
          value <= max;
 }
 
-// 💡 WHEN TO USE:
+// TIP: WHEN TO USE:
 // - Branded types: Financial calculations, IDs, measurements, sensitive data
 // - SafeMath: Any user-input arithmetic operations to prevent overflow
 // - Range validation: Age, scores, percentages, quantities, user inputs
@@ -275,9 +275,9 @@ function validateRange(value: number, min: number, max: number): boolean {
           description:
             "Arrays: ordered access needed • Sets: fast membership testing • Maps: key-value performance • Choose based on use case",
           language: "typescript",
-          code: `// ⚡ PERFORMANCE: Choose the right data structure
+          code: `// PERFORMANCE: PERFORMANCE: Choose the right data structure
 
-// ✅ Arrays: Use for ordered data and frequent access by index
+// RECOMMENDED: Arrays: Use for ordered data and frequent access by index
 const users: readonly User[] = [
   { id: 1, name: "Alice", email: "alice@example.com", role: "admin", createdAt: new Date() },
   { id: 2, name: "Bob", email: "bob@example.com", role: "user", createdAt: new Date() }
@@ -286,14 +286,14 @@ const users: readonly User[] = [
 // O(1) access by index
 const firstUser = users[0];
 
-// ✅ Sets: Use for membership testing and unique values
+// RECOMMENDED: Sets: Use for membership testing and unique values
 const validRoles = new Set<User["role"]>(["admin", "user", "guest"]);
 
 function isValidRole(role: string): role is User["role"] {
   return validRoles.has(role as User["role"]); // O(1) lookup vs O(n) for arrays
 }
 
-// ✅ Maps: Use for key-value associations with object keys
+// RECOMMENDED: Maps: Use for key-value associations with object keys
 const userCache = new Map<number, User>();
 
 function getUserById(id: number): User | null {
@@ -304,7 +304,7 @@ function cacheUser(user: User): void {
   userCache.set(user.id, user); // O(1) insertion
 }
 
-// ⚡ MEMORY: ReadonlyArray for immutable collections
+// PERFORMANCE: MEMORY: ReadonlyArray for immutable collections
 type ImmutableUsers = readonly User[];
 
 function processUsers(users: ImmutableUsers): ImmutableUsers {
@@ -313,7 +313,7 @@ function processUsers(users: ImmutableUsers): ImmutableUsers {
               .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-// ✅ Typed collections with constraints
+// RECOMMENDED: Typed collections with constraints
 class TypedSet<T> {
   private readonly items = new Set<T>();
   
@@ -356,13 +356,13 @@ const emailSet = new TypedSet<string>(
   100
 );
 
-// 💡 PERFORMANCE COMPARISON:
+// TIP: PERFORMANCE COMPARISON:
 // Array.includes(): O(n) - linear search, slow for large datasets
 // Set.has(): O(1) - hash lookup, fast even for large datasets  
 // Map.get(): O(1) - hash lookup, efficient key-value operations
 // Object property access: O(1) - but limited to string/symbol keys
 
-// 💡 WHEN TO USE:
+// TIP: WHEN TO USE:
 // - Array: Need indexing, ordered data, frequent iteration, small datasets
 // - Set: Membership testing, removing duplicates, unique collections, fast lookups
 // - Map: Key-value pairs with non-string keys, frequent lookups, complex keys
@@ -373,7 +373,7 @@ const emailSet = new TypedSet<string>(
           description:
             "Safe property access • Prevent runtime errors • Use proper typing • Handle optional properties",
           language: "typescript",
-          code: `// 🔒 Safe object operations with type guards
+          code: `// SECURITY: Safe object operations with type guards
 interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
@@ -388,13 +388,13 @@ function isErrorResponse(response: ApiResponse): response is ApiResponse & { err
   return response.status >= 400 && response.error !== undefined;
 }
 
-// ✅ Safe property access with default values
+// RECOMMENDED: Safe property access with default values
 function getProperty<T, K extends keyof T>(obj: T, key: K, defaultValue: T[K]): T[K] {
   const value = obj[key];
   return value !== undefined ? value : defaultValue;
 }
 
-// ✅ Safe object updates - immutable approach
+// RECOMMENDED: Safe object updates - immutable approach
 function updateUser<K extends keyof User>(
   user: User, 
   updates: Pick<User, K>
@@ -421,7 +421,7 @@ function updateUser<K extends keyof User>(
   return { ...user, ...validatedUpdates };
 }
 
-// ✅ Type-safe object transformation
+// RECOMMENDED: Type-safe object transformation
 function transformObject<T, U>(
   obj: T,
   transformer: (value: T[keyof T], key: keyof T) => U
@@ -437,7 +437,7 @@ function transformObject<T, U>(
   return result;
 }
 
-// ✅ Deep readonly types for immutable objects
+// RECOMMENDED: Deep readonly types for immutable objects
 type DeepReadonly<T> = {
   readonly [P in keyof T]: T[P] extends object 
     ? T[P] extends Function 
@@ -446,7 +446,7 @@ type DeepReadonly<T> = {
     : T[P];
 };
 
-// ✅ Safe object merging
+// RECOMMENDED: Safe object merging
 function mergeObjects<T extends Record<string, unknown>, U extends Record<string, unknown>>(
   target: T,
   source: U
@@ -464,7 +464,7 @@ function mergeObjects<T extends Record<string, unknown>, U extends Record<string
   return { ...target, ...source };
 }
 
-// 🔒 SECURITY: Prevent prototype pollution
+// SECURITY: SECURITY: Prevent prototype pollution
 function safeAssign<T extends Record<string, unknown>>(
   target: T,
   source: Record<string, unknown>
@@ -484,7 +484,7 @@ function safeAssign<T extends Record<string, unknown>>(
   return result;
 }
 
-// 💡 BEST PRACTICES:
+// TIP: BEST PRACTICES:
 // - Always validate object properties from external sources
 // - Use readonly types for immutable data structures and shared state
 // - Prefer immutable updates over mutations for predictable state changes
@@ -504,7 +504,7 @@ function safeAssign<T extends Record<string, unknown>>(
           description:
             "Validate at boundaries • Use discriminated unions • Early returns • Clear error paths",
           language: "typescript",
-          code: `// ✅ Strategic type guards - validate at system boundaries
+          code: `// RECOMMENDED: Strategic type guards - validate at system boundaries
 type APIResponse<T> = 
   | { success: true; data: T }
   | { success: false; error: string; code: number };
@@ -517,7 +517,7 @@ function isErrorResponse<T>(response: APIResponse<T>): response is { success: fa
   return response.success === false;
 }
 
-// ✅ Process API responses safely
+// RECOMMENDED: Process API responses safely
 async function fetchUserSafely(id: number): Promise<User | null> {
   // Guard clause - validate input early
   if (!Number.isInteger(id) || id <= 0) {
@@ -553,7 +553,7 @@ async function fetchUserSafely(id: number): Promise<User | null> {
   }
 }
 
-// ✅ Exhaustive type checking with never
+// RECOMMENDED: Exhaustive type checking with never
 type Theme = "light" | "dark" | "auto";
 
 function applyTheme(theme: Theme): void {
@@ -575,7 +575,7 @@ function applyTheme(theme: Theme): void {
   }
 }
 
-// ✅ Optional chaining and nullish coalescing for safety
+// RECOMMENDED: Optional chaining and nullish coalescing for safety
 interface NestedData {
   user?: {
     profile?: {
@@ -596,7 +596,7 @@ function isNotificationsEnabled(data: NestedData): boolean {
   return data.user?.profile?.settings?.notifications ?? true;
 }
 
-// 💡 DEFENSIVE PROGRAMMING:
+// TIP: DEFENSIVE PROGRAMMING:
 // - Validate inputs at function boundaries to catch errors early
 // - Use discriminated unions for complex state management
 // - Handle all possible cases with never type for exhaustive checking
@@ -608,7 +608,7 @@ function isNotificationsEnabled(data: NestedData): boolean {
           description:
             "Type-safe promises • Handle rejections properly • Async iterators • Cancellation patterns",
           language: "typescript",
-          code: `// ✅ Type-safe async operations with proper error handling
+          code: `// RECOMMENDED: Type-safe async operations with proper error handling
 type AsyncResult<T, E = Error> = Promise<
   | { success: true; data: T }
   | { success: false; error: E }
@@ -626,7 +626,7 @@ async function safeAsyncOperation<T>(
   }
 }
 
-// ✅ Async operation with timeout
+// RECOMMENDED: Async operation with timeout
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(() => reject(new Error(\`Operation timed out after \${timeoutMs}ms\`)), timeoutMs);
@@ -635,7 +635,7 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   return Promise.race([promise, timeoutPromise]);
 }
 
-// ✅ Parallel operations with error aggregation
+// RECOMMENDED: Parallel operations with error aggregation
 async function fetchMultipleUsers(ids: number[]): Promise<{
   users: User[];
   errors: Array<{ id: number; error: string }>;
@@ -666,7 +666,7 @@ async function fetchMultipleUsers(ids: number[]): Promise<{
   return { users, errors };
 }
 
-// ✅ Async iterators for streaming data
+// RECOMMENDED: Async iterators for streaming data
 async function* fetchUsersStream(): AsyncIterableIterator<User> {
   let page = 1;
   const pageSize = 10;
@@ -694,7 +694,7 @@ async function* fetchUsersStream(): AsyncIterableIterator<User> {
   }
 }
 
-// ✅ Cancellable async operations
+// RECOMMENDED: Cancellable async operations
 class CancellableOperation<T> {
   private controller = new AbortController();
   private promise: Promise<T>;
@@ -730,7 +730,7 @@ const operation = new CancellableOperation(async (signal) => {
 // Cancel if needed
 setTimeout(() => operation.cancel(), 5000);
 
-// 💡 ASYNC BEST PRACTICES:
+// TIP: ASYNC BEST PRACTICES:
 // - Always handle both success and error cases explicitly
 // - Use timeouts for external operations to prevent hanging
 // - Aggregate errors in parallel operations for better debugging
@@ -750,7 +750,7 @@ setTimeout(() => operation.cancel(), 5000);
           description:
             "Pure functions preferred • Avoid side effects • Single responsibility • Clear error handling",
           language: "typescript",
-          code: `// ✅ Pure function - predictable, testable, no side effects
+          code: `// RECOMMENDED: Pure function - predictable, testable, no side effects
 function calculateTax(amount: number, rate: number): number | null {
   // Input validation
   if (typeof amount !== "number" || typeof rate !== "number") {
@@ -768,7 +768,7 @@ function calculateTax(amount: number, rate: number): number | null {
   return Math.round(amount * rate * 100) / 100; // Round to 2 decimal places
 }
 
-// ✅ Function composition for complex operations
+// RECOMMENDED: Function composition for complex operations
 type Validator<T> = (value: T) => boolean;
 type Transformer<T, U> = (value: T) => U;
 
@@ -792,7 +792,7 @@ function compose<T, U, V>(
   };
 }
 
-// ✅ Higher-order function for retry logic
+// RECOMMENDED: Higher-order function for retry logic
 function withRetry<T extends unknown[], R>(
   fn: (...args: T) => Promise<R>,
   maxRetries: number = 3,
@@ -820,7 +820,7 @@ function withRetry<T extends unknown[], R>(
   };
 }
 
-// ✅ Function overloading for flexible APIs
+// RECOMMENDED: Function overloading for flexible APIs
 function processData(input: string): string;
 function processData(input: number): number;
 function processData(input: User): User;
@@ -841,7 +841,7 @@ function processData(input: string | number | User): string | number | User {
   throw new Error("Invalid input type");
 }
 
-// ✅ Currying for configuration
+// RECOMMENDED: Currying for configuration
 function createValidator<T>(
   validationRules: Array<(value: T) => boolean>,
   errorMessages: string[]
@@ -876,7 +876,7 @@ const userValidator = createValidator<User>(
   ]
 );
 
-// 💡 WHEN TO USE:
+// TIP: WHEN TO USE:
 // - Pure functions: Calculations, transformations, business logic that doesn't depend on external state
 // - Function composition: Complex data processing pipelines that need to be maintainable
 // - Higher-order functions: Cross-cutting concerns like retry, caching, logging, validation
@@ -887,7 +887,7 @@ const userValidator = createValidator<User>(
           description:
             "Type-safe error handling • Result types • Never fail silently • Comprehensive logging",
           language: "typescript",
-          code: `// ✅ Result type for better error handling
+          code: `// RECOMMENDED: Result type for better error handling
 type Result<T, E = Error> = 
   | { success: true; data: T }
   | { success: false; error: E };
@@ -900,7 +900,7 @@ function createError<E>(error: E): Result<never, E> {
   return { success: false, error };
 }
 
-// ✅ Safe operation wrapper
+// RECOMMENDED: Safe operation wrapper
 async function safeOperation<T>(
   operation: () => Promise<T>,
   context?: string
@@ -922,7 +922,7 @@ async function safeOperation<T>(
   }
 }
 
-// ✅ Custom error classes for specific domains
+// RECOMMENDED: Custom error classes for specific domains
 class ValidationError extends Error {
   constructor(
     message: string,
@@ -956,7 +956,7 @@ class BusinessError extends Error {
   }
 }
 
-// ✅ Error boundary function for async operations
+// RECOMMENDED: Error boundary function for async operations
 async function withErrorBoundary<T>(
   operation: () => Promise<T>,
   errorHandler: (error: Error) => T | null = () => null
@@ -990,7 +990,7 @@ async function withErrorBoundary<T>(
   }
 }
 
-// ✅ Assertion functions for development
+// RECOMMENDED: Assertion functions for development
 function assert(condition: boolean, message: string): asserts condition {
   if (!condition) {
     throw new Error(\`Assertion failed: \${message}\`);
@@ -1011,7 +1011,7 @@ function assertIsNumber(value: unknown): asserts value is number {
   }
 }
 
-// ✅ Safe resource management
+// RECOMMENDED: Safe resource management
 class ResourceManager<T> {
   constructor(
     private resource: T,
@@ -1034,7 +1034,7 @@ class ResourceManager<T> {
   }
 }
 
-// 💡 ERROR HANDLING STRATEGY:
+// TIP: ERROR HANDLING STRATEGY:
 // - Use Result types for operations that can fail gracefully
 // - Create domain-specific error classes for better debugging and handling
 // - Never fail silently - always log errors with context for monitoring
@@ -1054,7 +1054,7 @@ class ResourceManager<T> {
           description:
             "Safe file reading • Validate file types • Size limits • Handle encoding • Prevent malicious uploads",
           language: "typescript",
-          code: `// ✅ Safe file reading with comprehensive validation
+          code: `// RECOMMENDED: Safe file reading with comprehensive validation
 interface FileValidationConfig {
   maxSizeBytes: number;
   allowedTypes: string[];
@@ -1076,7 +1076,7 @@ class SecureFileHandler {
   ): Promise<{ success: true; data: string | ArrayBuffer } | { success: false; error: string }> {
     const fullConfig = { ...this.DEFAULT_CONFIG, ...config };
 
-    // 🔒 SECURITY: Validate file size to prevent DoS
+    // SECURITY: SECURITY: Validate file size to prevent DoS
     if (file.size > fullConfig.maxSizeBytes) {
       return {
         success: false,
@@ -1084,7 +1084,7 @@ class SecureFileHandler {
       };
     }
 
-    // 🔒 SECURITY: Validate file type
+    // SECURITY: SECURITY: Validate file type
     if (!fullConfig.allowedTypes.includes(file.type)) {
       return {
         success: false,
@@ -1092,7 +1092,7 @@ class SecureFileHandler {
       };
     }
 
-    // 🔒 SECURITY: Validate file extension
+    // SECURITY: SECURITY: Validate file extension
     const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
     if (!fullConfig.allowedExtensions.includes(extension)) {
       return {
@@ -1101,7 +1101,7 @@ class SecureFileHandler {
       };
     }
 
-    // 🔒 SECURITY: Check for suspicious file names
+    // SECURITY: SECURITY: Check for suspicious file names
     if (this.hasSuspiciousName(file.name)) {
       return {
         success: false,
@@ -1176,7 +1176,7 @@ class SecureFileHandler {
   }
 }
 
-// ✅ Usage example
+// RECOMMENDED: Usage example
 async function handleFileUpload(fileInput: HTMLInputElement): Promise<void> {
   const files = fileInput.files;
   if (!files || files.length === 0) return;
@@ -1197,7 +1197,7 @@ async function handleFileUpload(fileInput: HTMLInputElement): Promise<void> {
   }
 }
 
-// 💡 SECURITY BEST PRACTICES:
+// TIP: SECURITY BEST PRACTICES:
 // - Always validate file size, type, and extension to prevent malicious uploads
 // - Scan file content for suspicious patterns before processing
 // - Use Content Security Policy headers to prevent XSS through uploaded files
@@ -1209,7 +1209,7 @@ async function handleFileUpload(fileInput: HTMLInputElement): Promise<void> {
           description:
             "Safe data persistence • Encrypt sensitive data • Validate stored data • Handle storage quota",
           language: "typescript",
-          code: `// 🔒 Secure storage wrapper with encryption and validation
+          code: `// SECURITY: Secure storage wrapper with encryption and validation
 interface StorageItem<T> {
   data: T;
   timestamp: number;
@@ -1221,7 +1221,7 @@ class SecureStorage {
   private static readonly PREFIX = 'app_';
   private static readonly ENCRYPTION_KEY = 'your-secret-key'; // Use proper key management!
 
-  // ✅ Store data securely with expiration
+  // RECOMMENDED: Store data securely with expiration
   static setItem<T>(
     key: string,
     value: T,
@@ -1244,7 +1244,7 @@ class SecureStorage {
 
       let serialized = JSON.stringify(item);
       
-      // 🔒 SECURITY: Encrypt sensitive data
+      // SECURITY: SECURITY: Encrypt sensitive data
       if (options.encrypt) {
         serialized = this.encrypt(serialized);
       }
@@ -1259,7 +1259,7 @@ class SecureStorage {
     }
   }
 
-  // ✅ Retrieve data with validation and expiry check
+  // RECOMMENDED: Retrieve data with validation and expiry check
   static getItem<T>(
     key: string,
     validator?: (data: unknown) => data is T
@@ -1300,13 +1300,13 @@ class SecureStorage {
     }
   }
 
-  // ✅ Safe removal
+  // RECOMMENDED: Safe removal
   static removeItem(key: string): void {
     const storageKey = this.PREFIX + key;
     localStorage.removeItem(storageKey);
   }
 
-  // ✅ Clear all app data
+  // RECOMMENDED: Clear all app data
   static clearAll(): void {
     const keys = Object.keys(localStorage);
     keys.forEach(key => {
@@ -1316,7 +1316,7 @@ class SecureStorage {
     });
   }
 
-  // ✅ Check storage quota
+  // RECOMMENDED: Check storage quota
   static getStorageInfo(): { used: number; available: number; percentage: number } {
     try {
       const test = 'test';
@@ -1340,7 +1340,7 @@ class SecureStorage {
     }
   }
 
-  // 🔒 Simple encryption (use crypto-js or Web Crypto API in production)
+  // SECURITY: Simple encryption (use crypto-js or Web Crypto API in production)
   private static encrypt(text: string): string {
     // This is a simple XOR cipher for demo - use proper encryption in production!
     return btoa(text.split('').map((char, i) => 
@@ -1356,7 +1356,7 @@ class SecureStorage {
   }
 }
 
-// ✅ Type-safe user session management
+// RECOMMENDED: Type-safe user session management
 interface UserSession {
   userId: number;
   username: string;
@@ -1412,7 +1412,7 @@ class SessionManager {
   }
 }
 
-// 💡 STORAGE SECURITY BEST PRACTICES:
+// TIP: STORAGE SECURITY BEST PRACTICES:
 // - Never store sensitive data (passwords, tokens) in localStorage without encryption
 // - Always validate data when reading from storage to prevent injection attacks
 // - Implement expiration for all stored data to limit exposure window
@@ -1424,7 +1424,7 @@ class SessionManager {
           description:
             "Secure HTTP requests • Request validation • Error handling • Rate limiting • CSRF protection",
           language: "typescript",
-          code: `// ✅ Secure HTTP client with comprehensive protection
+          code: `// RECOMMENDED: Secure HTTP client with comprehensive protection
 interface RequestConfig {
   timeout?: number;
   retries?: number;
@@ -1445,7 +1445,7 @@ class SecureHttpClient {
   private static readonly BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
   private static readonly REQUEST_COUNTER = new Map<string, number>();
 
-  // ✅ Rate limiting per endpoint
+  // RECOMMENDED: Rate limiting per endpoint
   private static checkRateLimit(endpoint: string): boolean {
     const now = Date.now();
     const key = \`\${endpoint}_\${Math.floor(now / 60000)}\`; // Per minute window
@@ -1460,12 +1460,12 @@ class SecureHttpClient {
     return true;
   }
 
-  // ✅ Secure request wrapper
+  // RECOMMENDED: Secure request wrapper
   static async request<T>(
     endpoint: string,
     options: RequestInit & RequestConfig = {}
   ): Promise<Result<T, ApiError>> {
-    // 🔒 SECURITY: Rate limiting
+    // SECURITY: SECURITY: Rate limiting
     if (!this.checkRateLimit(endpoint)) {
       return createError({
         code: 'RATE_LIMITED',
@@ -1475,7 +1475,7 @@ class SecureHttpClient {
       });
     }
 
-    // 🔒 SECURITY: Validate URL to prevent SSRF
+    // SECURITY: SECURITY: Validate URL to prevent SSRF
     if (!this.isValidEndpoint(endpoint)) {
       return createError({
         code: 'INVALID_ENDPOINT',
@@ -1494,19 +1494,19 @@ class SecureHttpClient {
       ...fetchOptions
     } = options;
 
-    // ✅ Build secure headers
+    // RECOMMENDED: Build secure headers
     const headers = new Headers({
       'Content-Type': 'application/json',
       'X-Requested-With': 'XMLHttpRequest', // CSRF protection
       ...((fetchOptions.headers as Record<string, string>) || {})
     });
 
-    // 🔒 SECURITY: Add CSRF token
+    // SECURITY: SECURITY: Add CSRF token
     if (csrfToken) {
       headers.set('X-CSRF-Token', csrfToken);
     }
 
-    // 🔒 SECURITY: Add security headers
+    // SECURITY: SECURITY: Add security headers
     headers.set('X-Content-Type-Options', 'nosniff');
     
     const requestOptions: RequestInit = {
@@ -1515,7 +1515,7 @@ class SecureHttpClient {
       credentials: includeCredentials ? 'include' : 'same-origin',
     };
 
-    // ✅ Implement retry logic with exponential backoff
+    // RECOMMENDED: Implement retry logic with exponential backoff
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         const controller = new AbortController();
@@ -1528,13 +1528,13 @@ class SecureHttpClient {
 
         clearTimeout(timeoutId);
 
-        // ✅ Validate response
+        // RECOMMENDED: Validate response
         if (!response.ok) {
           const errorData = await this.parseErrorResponse(response);
           return createError(errorData);
         }
 
-        // 🔒 SECURITY: Validate content type
+        // SECURITY: SECURITY: Validate content type
         const contentType = response.headers.get('content-type');
         if (validateResponse && contentType && !contentType.includes('application/json')) {
           return createError({
@@ -1547,7 +1547,7 @@ class SecureHttpClient {
 
         const data = await response.json();
         
-        // ✅ Validate response structure
+        // RECOMMENDED: Validate response structure
         if (validateResponse && !this.isValidResponse(data)) {
           return createError({
             code: 'INVALID_RESPONSE',
@@ -1582,7 +1582,7 @@ class SecureHttpClient {
     });
   }
 
-  // ✅ Type-safe API methods
+  // RECOMMENDED: Type-safe API methods
   static async get<T>(endpoint: string, config?: RequestConfig): Promise<Result<T, ApiError>> {
     return this.request<T>(endpoint, { method: 'GET', ...config });
   }
@@ -1615,7 +1615,7 @@ class SecureHttpClient {
     return this.request<T>(endpoint, { method: 'DELETE', ...config });
   }
 
-  // 🔒 Validate endpoint to prevent SSRF attacks
+  // SECURITY: Validate endpoint to prevent SSRF attacks
   private static isValidEndpoint(endpoint: string): boolean {
     // Only allow relative URLs or whitelisted domains
     if (endpoint.startsWith('/')) return true;
@@ -1658,7 +1658,7 @@ class SecureHttpClient {
   }
 }
 
-// ✅ Usage example with proper error handling
+// RECOMMENDED: Usage example with proper error handling
 async function fetchUserProfile(userId: number): Promise<UserSession | null> {
   const result = await SecureHttpClient.get<UserSession>(\`/api/users/\${userId}\`, {
     timeout: 5000,
@@ -1678,7 +1678,7 @@ async function fetchUserProfile(userId: number): Promise<UserSession | null> {
   }
 }
 
-// 💡 NETWORK SECURITY BEST PRACTICES:
+// TIP: NETWORK SECURITY BEST PRACTICES:
 // - Implement rate limiting to prevent abuse and DoS attacks
 // - Validate all endpoints to prevent SSRF (Server-Side Request Forgery)
 // - Use CSRF tokens for state-changing operations
@@ -1699,7 +1699,7 @@ async function fetchUserProfile(userId: number): Promise<UserSession | null> {
           description:
             "Reduce bundle size • Tree shaking • Dynamic imports • Type-only imports • Lazy loading patterns",
           language: "typescript",
-          code: `// ⚡ Type-only imports for better tree shaking
+          code: `// PERFORMANCE: Type-only imports for better tree shaking
 import type { User, ApiResponse } from './types/user';
 import type { ComponentProps } from 'react';
 
@@ -1707,7 +1707,7 @@ import type { ComponentProps } from 'react';
 const loadUserModule = () => import('./modules/user');
 const loadChartComponent = () => import('./components/Chart');
 
-// ✅ Lazy-loaded type-safe modules
+// RECOMMENDED: Lazy-loaded type-safe modules
 interface LazyModule<T> {
   load(): Promise<T>;
   isLoaded(): boolean;
@@ -1747,7 +1747,7 @@ class LazyModuleLoader<T> implements LazyModule<T> {
   }
 }
 
-// ✅ Smart component lazy loading
+// RECOMMENDED: Smart component lazy loading
 interface LazyComponentProps<T> {
   loader: () => Promise<{ default: React.ComponentType<T> }>;
   fallback?: React.ComponentNode;
@@ -1779,7 +1779,7 @@ function LazyComponent<T>({ loader, fallback, props }: LazyComponentProps<T>) {
   return <Component {...props} />;
 }
 
-// ✅ Bundle analyzer utility
+// RECOMMENDED: Bundle analyzer utility
 interface BundleAnalysis {
   totalSize: number;
   gzippedSize: number;
@@ -1788,7 +1788,7 @@ interface BundleAnalysis {
 }
 
 class BundleOptimizer {
-  // ✅ Detect unused exports (for build-time analysis)
+  // RECOMMENDED: Detect unused exports (for build-time analysis)
   static analyzeImports(sourceCode: string): {
     imports: string[];
     unusedImports: string[];
@@ -1824,7 +1824,7 @@ class BundleOptimizer {
     return { imports, unusedImports, typeOnlyImports };
   }
 
-  // ✅ Dynamic import with preloading
+  // RECOMMENDED: Dynamic import with preloading
   static createPreloadableImport<T>(
     loader: () => Promise<T>,
     preloadCondition?: () => boolean
@@ -1855,7 +1855,7 @@ class BundleOptimizer {
   }
 }
 
-// ✅ Webpack bundle splitting optimization hints
+// RECOMMENDED: Webpack bundle splitting optimization hints
 /* webpack/tsconfig.json configuration:
 {
   "compilerOptions": {
@@ -1893,7 +1893,7 @@ class BundleOptimizer {
 }
 */
 
-// 💡 BUNDLE OPTIMIZATION STRATEGIES:
+// TIP: BUNDLE OPTIMIZATION STRATEGIES:
 // - Use "type" imports exclusively for types to enable better tree shaking
 // - Implement dynamic imports for large components and libraries
 // - Preload critical modules during idle time to improve perceived performance
@@ -1905,7 +1905,7 @@ class BundleOptimizer {
           description:
             "Prevent memory leaks • Optimize collections • Weak references • Object pooling • Garbage collection awareness",
           language: "typescript",
-          code: `// ✅ Memory-efficient data structures
+          code: `// RECOMMENDED: Memory-efficient data structures
 class LRUCache<K, V> {
   private cache = new Map<K, V>();
   private maxSize: number;
@@ -1945,7 +1945,7 @@ class LRUCache<K, V> {
     return this.cache.size;
   }
   
-  // ⚡ Memory usage estimation
+  // PERFORMANCE: Memory usage estimation
   getMemoryUsage(): number {
     let size = 0;
     for (const [key, value] of this.cache) {
@@ -1966,7 +1966,7 @@ class LRUCache<K, V> {
   }
 }
 
-// ✅ Weak references for memory management
+// RECOMMENDED: Weak references for memory management
 class WeakCache<T extends object, V> {
   private cache = new WeakMap<T, V>();
   
@@ -1987,7 +1987,7 @@ class WeakCache<T extends object, V> {
   }
 }
 
-// ✅ Object pooling for frequent allocations
+// RECOMMENDED: Object pooling for frequent allocations
 class ObjectPool<T> {
   private pool: T[] = [];
   private createFn: () => T;
@@ -2032,7 +2032,7 @@ class ObjectPool<T> {
   }
 }
 
-// ✅ Memory leak detection and prevention
+// RECOMMENDED: Memory leak detection and prevention
 class MemoryLeakDetector {
   private static readonly observers = new Set<() => void>();
   private static readonly timers = new Set<number>();
@@ -2115,7 +2115,7 @@ class MemoryLeakDetector {
   }
 }
 
-// ✅ Optimized collection operations
+// RECOMMENDED: Optimized collection operations
 class OptimizedArray<T> {
   private items: T[] = [];
   private indices = new Map<T, number>();
@@ -2156,7 +2156,7 @@ class OptimizedArray<T> {
   }
 }
 
-// ✅ React component memory optimization
+// RECOMMENDED: React component memory optimization
 interface ComponentCleanup {
   cleanup(): void;
 }
@@ -2191,7 +2191,7 @@ const stringPool = new ObjectPool(
 const userCache = new LRUCache<number, User>(50);
 const componentCache = new WeakCache<HTMLElement, ComponentData>();
 
-// 💡 MEMORY OPTIMIZATION STRATEGIES:
+// TIP: MEMORY OPTIMIZATION STRATEGIES:
 // - Use LRU cache for frequently accessed data with size limits
 // - Implement object pooling for frequently created/destroyed objects
 // - Use WeakMap/WeakSet for object associations that shouldn't prevent garbage collection
@@ -2211,11 +2211,11 @@ const componentCache = new WeakCache<HTMLElement, ComponentData>();
           description:
             "Custom utility types • Type transformations • Template literal magic • Conditional types",
           language: "typescript",
-          code: `// ✅ Advanced utility types for API design
+          code: `// RECOMMENDED: Advanced utility types for API design
 type StrictOmit<T, K extends keyof T> = Omit<T, K>;
 type StrictPick<T, K extends keyof T> = Pick<T, K>;
 
-// ✅ Deep partial for nested objects
+// RECOMMENDED: Deep partial for nested objects
 type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object 
     ? T[P] extends Array<infer U>
@@ -2224,7 +2224,7 @@ type DeepPartial<T> = {
     : T[P];
 };
 
-// ✅ Type-safe path access
+// RECOMMENDED: Type-safe path access
 type PathsToStringProps<T> = T extends string
   ? []
   : {
@@ -2252,7 +2252,7 @@ type Join<T extends string[], D extends string> = T extends readonly [
 type UserPaths = Join<PathsToStringProps<User>, '.'>;
 // Result: "name" | "email" | "role"
 
-// ✅ Event system with template literals
+// RECOMMENDED: Event system with template literals
 type EventMap = {
   'user:created': { user: User };
   'user:updated': { user: User; changes: Partial<User> };
@@ -2288,7 +2288,7 @@ class TypedEventEmitter {
   }
 }
 
-// ✅ Builder pattern with method chaining
+// RECOMMENDED: Builder pattern with method chaining
 class QueryBuilder<T> {
   private filters: Array<(item: T) => boolean> = [];
   private sortFn?: (a: T, b: T) => number;
@@ -2340,7 +2340,7 @@ const userQuery = new QueryBuilder<User>()
   .sortBy("name", "asc")
   .limit(10);
 
-// 💡 ADVANCED PATTERNS:
+// TIP: ADVANCED PATTERNS:
 // - Use conditional types for flexible APIs that adapt to input types
 // - Template literals for type-safe string operations and domain-specific languages
 // - Builder pattern for complex object construction with method chaining
@@ -2359,7 +2359,7 @@ const userQuery = new QueryBuilder<User>()
           description:
             "Test type safety • Mock dependencies • Test error conditions • Use proper assertions",
           language: "typescript",
-          code: `// ✅ Type-safe test utilities
+          code: `// RECOMMENDED: Type-safe test utilities
 interface TestUser extends User {
   readonly _testId: unique symbol;
 }
@@ -2376,7 +2376,7 @@ function createTestUser(overrides: Partial<User> = {}): TestUser {
   } as TestUser;
 }
 
-// ✅ Type-safe mocking
+// RECOMMENDED: Type-safe mocking
 interface MockApi {
   getUser: jest.MockedFunction<(id: number) => Promise<User>>;
   updateUser: jest.MockedFunction<(id: number, data: Partial<User>) => Promise<User>>;
@@ -2391,7 +2391,7 @@ function createMockApi(): MockApi {
   };
 }
 
-// ✅ Test fixtures with type safety
+// RECOMMENDED: Test fixtures with type safety
 class TestFixtures {
   static users = {
     admin: (): TestUser => createTestUser({
@@ -2427,7 +2427,7 @@ class TestFixtures {
   };
 }
 
-// ✅ Comprehensive test suite
+// RECOMMENDED: Comprehensive test suite
 describe("UserService", () => {
   let mockApi: MockApi;
   let userService: UserService;
@@ -2500,7 +2500,7 @@ describe("UserService", () => {
   });
 });
 
-// ✅ Property-based testing
+// RECOMMENDED: Property-based testing
 import { fc } from 'fast-check';
 
 describe("User validation", () => {
@@ -2529,7 +2529,7 @@ describe("User validation", () => {
   });
 });
 
-// 💡 TESTING BEST PRACTICES:
+// TIP: TESTING BEST PRACTICES:
 // - Create type-safe test utilities and fixtures for consistent testing
 // - Mock external dependencies with proper typing to maintain type safety
 // - Test both success and error conditions to ensure robustness
@@ -2541,7 +2541,7 @@ describe("User validation", () => {
           description:
             "Type-safe logging • Debug utilities • Performance profiling • Error tracking",
           language: "typescript",
-          code: `// ✅ Type-safe logging system
+          code: `// RECOMMENDED: Type-safe logging system
 enum LogLevel {
   DEBUG = 0,
   INFO = 1,
@@ -2597,7 +2597,7 @@ class TypedLogger {
 
 const logger = new TypedLogger();
 
-// ✅ Debug utilities with type information
+// RECOMMENDED: Debug utilities with type information
 function debugValue<T>(label: string, value: T): T {
   if (process.env.NODE_ENV === 'development') {
     logger.debug(\`Debug: \${label}\`, {
@@ -2635,7 +2635,7 @@ function debugFunction<T extends (...args: any[]) => any>(fn: T): T {
   }) as T;
 }
 
-// ✅ Performance profiling
+// RECOMMENDED: Performance profiling
 class PerformanceProfiler {
   private static marks = new Map<string, number>();
   
@@ -2676,7 +2676,7 @@ class PerformanceProfiler {
   }
 }
 
-// ✅ Error boundary with context
+// RECOMMENDED: Error boundary with context
 class ErrorTracker {
   private static errors: Array<{
     error: Error;
@@ -2730,7 +2730,7 @@ class ErrorTracker {
   }
 }
 
-// ✅ Type-safe debugging hooks
+// RECOMMENDED: Type-safe debugging hooks
 function useDebugValue<T>(value: T, label: string): T {
   if (process.env.NODE_ENV === 'development') {
     React.useDebugValue(\`\${label}: \${JSON.stringify(value)}\`);
@@ -2744,7 +2744,7 @@ const profiledOperation = () => PerformanceProfiler.profile('userData', () => {
   return processUserData(userData);
 });
 
-// 💡 DEBUGGING STRATEGIES:
+// TIP: DEBUGGING STRATEGIES:
 // - Use structured logging with context for better error tracking
 // - Profile performance-critical functions to identify bottlenecks
 // - Capture errors with full context information for effective debugging

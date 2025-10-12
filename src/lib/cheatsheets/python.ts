@@ -19,20 +19,20 @@ export const pythonCheatSheet: CheatSheet = {
           code: `# Type hints for better code - ALWAYS use in production
 from typing import Optional, List, Dict, Union
 
-# ✅ Always use type hints for function parameters
+# RECOMMENDED: Always use type hints for function parameters
 def process_user_data(name: str, age: int, active: bool = True) -> Dict[str, Union[str, int, bool]]:
     return {"name": name, "age": age, "active": active}
 
-# ✅ Optional types for nullable values
+# RECOMMENDED: Optional types for nullable values
 def find_user(user_id: int) -> Optional[Dict[str, str]]:
     # Return None if not found, dict if found
     return None
 
-# ✅ Collections with types
+# RECOMMENDED: Collections with types
 usernames: List[str] = ["alice", "bob", "charlie"]
 user_scores: Dict[str, int] = {"alice": 100, "bob": 85}
 
-# 🔒 SECURITY: Always validate input types
+# SECURITY: Always validate input types
 def safe_age_check(age_input: str) -> bool:
     """Validate age input to prevent injection/overflow attacks."""
     try:
@@ -41,7 +41,7 @@ def safe_age_check(age_input: str) -> bool:
     except ValueError:
         return False  # Invalid input
 
-# 💡 WHEN TO USE: Type hints are essential for team projects,
+# TIP: WHEN TO USE: Type hints are essential for team projects,
 # help IDEs catch errors, and improve code maintainability`,
         },
         {
@@ -53,7 +53,7 @@ def safe_age_check(age_input: str) -> bool:
 import html
 from typing import Optional
 
-# 🔒 SECURITY: Always validate and sanitize user input
+# SECURITY: Always validate and sanitize user input
 def sanitize_username(username: str) -> Optional[str]:
     """Only allow alphanumeric and underscore - prevents injection."""
     if re.match(r'^[a-zA-Z0-9_]{3,20}$', username):
@@ -64,15 +64,15 @@ def sanitize_html_input(user_input: str) -> str:
     """Escape HTML to prevent XSS attacks."""
     return html.escape(user_input.strip())
 
-# ✅ String formatting - prefer f-strings for readability and safety
+# RECOMMENDED: String formatting - prefer f-strings for readability and safety
 name = "Alice"
 age = 30
 message = f"User {name} is {age} years old"  # Modern, safe
 
-# ❌ AVOID: % formatting for user input (injection risk)
+# AVOID: % formatting for user input (injection risk)
 # message = "User %s is %d years old" % (name, age)  # Old, risky
 
-# 🔒 Safe file path handling
+# SECURITY: Safe file path handling
 import os
 def safe_file_path(user_filename: str) -> Optional[str]:
     """Prevent directory traversal attacks."""
@@ -80,9 +80,9 @@ def safe_file_path(user_filename: str) -> Optional[str]:
         return None
     return os.path.join('/safe/directory', user_filename)
 
-# 💡 WHEN TO USE: Always validate external input - forms, APIs, files
-# 💡 WHY: Prevents SQL injection, XSS, path traversal attacks
-# 💡 COMMON MISTAKE: Trusting user input without validation`,
+# TIP: WHEN TO USE: Always validate external input - forms, APIs, files
+# TIP: WHY: Prevents SQL injection, XSS, path traversal attacks
+# TIP: COMMON MISTAKE: Trusting user input without validation`,
         },
         {
           title: "Numbers & Performance-Aware Math",
@@ -93,7 +93,7 @@ def safe_file_path(user_filename: str) -> Optional[str]:
 import decimal
 from fractions import Fraction
 
-# ⚡ Basic arithmetic with performance considerations
+# PERFORMANCE: Basic arithmetic with performance considerations
 x = 10
 y = 3
 
@@ -105,23 +105,23 @@ print(x // y)   # 3 (floor division - faster than regular division)
 print(x % y)    # 1 (modulo - useful for cycling)
 print(x ** y)   # 1000 (exponentiation - use math.pow() for floats)
 
-# 💡 PERFORMANCE: Use appropriate functions
+# TIP: PERFORMANCE: Use appropriate functions
 print(pow(2, 3))        # 8 (built-in, good for integers)
 print(math.pow(2, 3))   # 8.0 (returns float, use for float operations)
 print(2 ** 3)           # 8 (fastest for small integers)
 
-# 🔒 PRECISION: Use Decimal for financial calculations
+# SECURITY: PRECISION: Use Decimal for financial calculations
 price = decimal.Decimal('19.99')
 tax = decimal.Decimal('0.08')
 total = price * (1 + tax)  # Precise decimal arithmetic
 
-# ✅ Safe division with validation
+# RECOMMENDED: Safe division with validation
 def safe_divide(a: float, b: float) -> Optional[float]:
     if b == 0:
         return None  # Avoid ZeroDivisionError
     return a / b
 
-# 💡 WHEN TO USE:
+# TIP: WHEN TO USE:
 # - int: Counting, indexing, exact values
 # - float: Scientific calculations (watch precision)
 # - Decimal: Money, exact decimal representation
@@ -143,14 +143,14 @@ def safe_divide(a: float, b: float) -> Optional[float]:
           code: `from typing import Iterator, List, Set
 import sys
 
-# ⚡ PERFORMANCE: Choose the right data structure
+# PERFORMANCE: Choose the right data structure
 
-# ✅ Lists: Use when you need indexing and small datasets
+# RECOMMENDED: Lists: Use when you need indexing and small datasets
 users = ["alice", "bob", "charlie"]
 first_user = users[0]  # O(1) access
 users.append("diana")  # O(1) average
 
-# ✅ Generators: Use for large datasets or streaming data
+# RECOMMENDED: Generators: Use for large datasets or streaming data
 def process_large_file(filename: str) -> Iterator[str]:
     """Memory efficient - processes one line at a time."""
     with open(filename) as f:
@@ -160,7 +160,7 @@ def process_large_file(filename: str) -> Iterator[str]:
 # Generator expressions for transformations
 large_numbers = (x**2 for x in range(1000000))  # No memory until needed
 
-# ✅ Sets: Use for membership testing and unique values
+# RECOMMENDED: Sets: Use for membership testing and unique values
 valid_usernames = {"alice", "bob", "charlie", "diana"}
 if username in valid_usernames:  # O(1) lookup vs O(n) for lists
     print("Valid user")
@@ -169,10 +169,10 @@ if username in valid_usernames:  # O(1) lookup vs O(n) for lists
 # List comprehension: [x**2 for x in range(10000)]  # ~400KB memory
 # Generator: (x**2 for x in range(10000))           # ~200 bytes
 
-# ✅ Set comprehensions for filtering duplicates
+# RECOMMENDED: Set comprehensions for filtering duplicates
 unique_words = {word.lower() for word in text.split()}
 
-# 💡 WHEN TO USE:
+# TIP: WHEN TO USE:
 # - Lists: Need indexing, small data, multiple iterations
 # - Generators: Large data, one-time iteration, memory constrained
 # - Sets: Membership testing, removing duplicates, math operations`,
@@ -185,40 +185,40 @@ unique_words = {word.lower() for word in text.split()}
           code: `from collections import defaultdict, Counter
 from typing import Dict, Any, List
 
-# 🔒 SAFE dictionary operations
+# SECURITY: SAFE dictionary operations
 user_data = {"name": "Alice", "age": 30}
 
-# ✅ Safe access with defaults - prevents KeyError
+# RECOMMENDED: Safe access with defaults - prevents KeyError
 email = user_data.get("email", "no-email@example.com")
 age = user_data.get("age", 0)
 
-# ✅ Check before deletion
+# RECOMMENDED: Check before deletion
 if "temp_data" in user_data:
     del user_data["temp_data"]
 
-# ✅ setdefault for conditional creation
+# RECOMMENDED: setdefault for conditional creation
 user_data.setdefault("login_count", 0)
 user_data["login_count"] += 1
 
-# ⚡ PERFORMANCE: dict comprehensions vs loops
+# PERFORMANCE: dict comprehensions vs loops
 birth_data = {"alice": 1990, "bob": 1985, "charlie": 1995}
 
-# ✅ Fast dictionary creation O(n)
+# RECOMMENDED: Fast dictionary creation O(n)
 user_ages = {name: 2025 - birth_year
              for name, birth_year in birth_data.items()
              if birth_year > 1990}
 
-# ❌ Slower loop approach
+# AVOID: Slower loop approach
 # user_ages = {}
 # for name, birth_year in birth_data.items():
 #     if birth_year > 1990:
 #         user_ages[name] = 2025 - birth_year
 
-# ✅ defaultdict prevents KeyError
+# RECOMMENDED: defaultdict prevents KeyError
 user_scores = defaultdict(int)  # Default to 0
 user_scores["alice"] += 10  # No KeyError possible
 
-# 🔒 SECURITY: Validate dictionary keys from external sources
+# SECURITY: Validate dictionary keys from external sources
 def safe_update_user(user_id: int, updates: Dict[str, Any]) -> bool:
     """Only allow safe field updates."""
     allowed_fields = {"name", "email", "phone"}
@@ -233,7 +233,7 @@ def safe_update_user(user_id: int, updates: Dict[str, Any]) -> bool:
     # Proceed with safe updates...
     return True
 
-# 💡 WHEN TO USE:
+# TIP: WHEN TO USE:
 # - .get(): When key might not exist
 # - defaultdict: When you need default values for missing keys
 # - Counter: For frequency counting (much faster than manual)`,
@@ -251,7 +251,7 @@ def safe_update_user(user_id: int, updates: Dict[str, Any]) -> bool:
           description:
             "Use guard clauses • Early returns • Avoid deep nesting • Clear error handling paths",
           language: "python",
-          code: `# ✅ Guard clauses - exit early for invalid conditions
+          code: `# RECOMMENDED: Guard clauses - exit early for invalid conditions
 def process_user_order(user_id: int, items: List[str]) -> bool:
     # Guard clauses first
     if not user_id or user_id <= 0:
@@ -270,7 +270,7 @@ def process_user_order(user_id: int, items: List[str]) -> bool:
 
     return True
 
-# ❌ Avoid deep nesting
+# AVOID: Avoid deep nesting
 def bad_validation(user_data: dict) -> bool:
     if "name" in user_data:
         if len(user_data["name"]) > 0:
@@ -279,7 +279,7 @@ def bad_validation(user_data: dict) -> bool:
                     return True
     return False
 
-# ✅ Better: Flat structure with clear logic
+# RECOMMENDED: Better: Flat structure with clear logic
 def good_validation(user_data: dict) -> bool:
     if "name" not in user_data:
         return False
@@ -295,7 +295,7 @@ def good_validation(user_data: dict) -> bool:
 
     return True
 
-# 💡 WHEN TO USE:
+# TIP: WHEN TO USE:
 # - Guard clauses: Input validation, precondition checks
 # - Early returns: Complex business logic, error handling
 # - Flat structure: Better readability and maintainability`,
@@ -307,41 +307,41 @@ def good_validation(user_data: dict) -> bool:
           language: "python",
           code: `from typing import Iterator, Tuple
 
-# ⚡ PERFORMANCE: Choose the right iteration method
+# PERFORMANCE: Choose the right iteration method
 
-# ✅ enumerate() instead of manual indexing
+# RECOMMENDED: enumerate() instead of manual indexing
 items = ["apple", "banana", "orange"]
 for index, item in enumerate(items):
     print(f"{index}: {item}")
 
-# ❌ Manual indexing (slower and error-prone)
+# AVOID: Manual indexing (slower and error-prone)
 # for i in range(len(items)):
 #     print(f"{i}: {items[i]}")
 
-# ✅ zip() for parallel iteration
+# RECOMMENDED: zip() for parallel iteration
 names = ["Alice", "Bob", "Charlie"]
 ages = [25, 30, 35]
 for name, age in zip(names, ages):
     print(f"{name} is {age} years old")
 
-# ✅ Early break for efficiency
+# RECOMMENDED: Early break for efficiency
 def find_user(users: List[dict], target_id: int) -> Optional[dict]:
     for user in users:
         if user.get("id") == target_id:
             return user  # Found it, stop searching
     return None
 
-# ✅ any() and all() for boolean checks
+# RECOMMENDED: any() and all() for boolean checks
 numbers = [2, 4, 6, 8, 10]
 has_even = any(n % 2 == 0 for n in numbers)  # True, stops at first even
 all_even = all(n % 2 == 0 for n in numbers)  # True
 
-# ⚡ Generator expressions vs list comprehensions
+# PERFORMANCE: Generator expressions vs list comprehensions
 # Use when you only iterate once
 even_squares = (x**2 for x in range(1000) if x % 2 == 0)  # Memory efficient
 first_few = list(itertools.islice(even_squares, 5))  # Take only what you need
 
-# 💡 PERFORMANCE TIPS:
+# TIP: PERFORMANCE TIPS:
 # - Break early when condition is met
 # - Use generators for large datasets
 # - Prefer built-in functions (any, all, sum, max, min)
@@ -364,26 +364,26 @@ first_few = list(itertools.islice(even_squares, 5))  # Take only what you need
 from functools import wraps
 import logging
 
-# ✅ Pure function - predictable, testable, no side effects
+# RECOMMENDED: Pure function - predictable, testable, no side effects
 def calculate_tax(amount: float, rate: float) -> float:
     """Pure function: same inputs always produce same outputs."""
     if amount < 0 or rate < 0:
         raise ValueError("Amount and rate must be non-negative")
     return amount * rate
 
-# ❌ NEVER use mutable default arguments
+# AVOID: NEVER use mutable default arguments
 def add_item_wrong(item: str, items: List[str] = []) -> List[str]:
-    items.append(item)  # ❌ Modifies shared default list!
+    items.append(item)  # AVOID: Modifies shared default list!
     return items
 
-# ✅ Correct way with mutable defaults
+# RECOMMENDED: Correct way with mutable defaults
 def add_item(item: str, items: Optional[List[str]] = None) -> List[str]:
     if items is None:
-        items = []  # ✅ Create new list each time
+        items = []  # RECOMMENDED: Create new list each time
     items.append(item)
     return items
 
-# ✅ Function with comprehensive validation
+# RECOMMENDED: Function with comprehensive validation
 def divide_safely(a: Union[int, float], b: Union[int, float]) -> Optional[float]:
     """Safely divide two numbers with full error handling."""
     # Type validation
@@ -398,7 +398,7 @@ def divide_safely(a: Union[int, float], b: Union[int, float]) -> Optional[float]
 
     return float(a) / float(b)
 
-# ✅ Decorator for input validation
+# RECOMMENDED: Decorator for input validation
 def validate_positive(func: Callable) -> Callable:
     """Decorator to ensure all numeric arguments are positive."""
     @wraps(func)
@@ -413,7 +413,7 @@ def validate_positive(func: Callable) -> Callable:
 def calculate_square_root(number: float) -> float:
     return number ** 0.5
 
-# 💡 WHEN TO USE:
+# TIP: WHEN TO USE:
 # - Pure functions: Calculations, transformations, business logic
 # - Validation decorators: Repeated input validation patterns
 # - Optional returns: When operation might fail legitimately`,
@@ -427,7 +427,7 @@ def calculate_square_root(number: float) -> float:
 from contextlib import contextmanager
 from typing import Generator
 
-# ✅ Specific exception handling - catch what you can handle
+# RECOMMENDED: Specific exception handling - catch what you can handle
 def parse_user_age(age_str: str) -> int:
     """Parse age with comprehensive error handling."""
     try:
@@ -439,7 +439,7 @@ def parse_user_age(age_str: str) -> int:
         logging.error(f"Invalid age input '{age_str}': {e}")
         raise  # Re-raise with context - don't silently fail
 
-# ✅ Custom exceptions for domain logic
+# RECOMMENDED: Custom exceptions for domain logic
 class UserNotFoundError(Exception):
     """Raised when user doesn't exist in system."""
     pass
@@ -470,7 +470,7 @@ def get_user_profile(user_id: int, requester_id: int) -> dict:
 
     return user
 
-# ✅ Resource management with context managers
+# RECOMMENDED: Resource management with context managers
 @contextmanager
 def database_transaction() -> Generator[Any, None, None]:
     """Safe database transaction with automatic rollback."""
@@ -497,7 +497,7 @@ def update_user_safely(user_id: int, data: dict) -> bool:
         logging.error(f"Failed to update user {user_id}: {e}")
         return False
 
-# 💡 ERROR HANDLING STRATEGY:
+# TIP: ERROR HANDLING STRATEGY:
 # - Specific exceptions: Catch only what you can handle
 # - Custom exceptions: Domain-specific error types
 # - Context managers: Automatic resource cleanup
@@ -524,28 +524,28 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 import logging
 
-# ✅ Safe file reading with comprehensive validation
+# RECOMMENDED: Safe file reading with comprehensive validation
 def read_config_file(filepath: str, max_size_mb: int = 10) -> Optional[Dict[str, Any]]:
     """Safely read config file with security checks."""
     try:
         path = Path(filepath)
 
-        # 🔒 Security: Validate file path
+        # SECURITY: Security: Validate file path
         if not path.exists():
             logging.error(f"Config file not found: {filepath}")
             return None
 
-        # 🔒 Security: Check file size to prevent DoS
+        # SECURITY: Security: Check file size to prevent DoS
         if path.stat().st_size > max_size_mb * 1024 * 1024:
             logging.error(f"Config file too large: {filepath}")
             return None
 
-        # 🔒 Security: Ensure it's a file, not directory
+        # SECURITY: Security: Ensure it's a file, not directory
         if not path.is_file():
             logging.error(f"Path is not a file: {filepath}")
             return None
 
-        # 🔒 Security: Check read permissions
+        # SECURITY: Security: Check read permissions
         if not os.access(path, os.R_OK):
             logging.error(f"No read permission: {filepath}")
             return None
@@ -557,10 +557,10 @@ def read_config_file(filepath: str, max_size_mb: int = 10) -> Optional[Dict[str,
         logging.error(f"Failed to read config {filepath}: {e}")
         return None
 
-# ✅ Safe file writing with atomic operations
+# RECOMMENDED: Safe file writing with atomic operations
 def save_user_data(user_id: int, data: Dict[str, Any], data_dir: str = "/safe/data") -> bool:
     """Atomically save user data to prevent corruption."""
-    # 🔒 Validate user_id to prevent path injection
+    # SECURITY: Validate user_id to prevent path injection
     if not isinstance(user_id, int) or user_id <= 0:
         logging.error(f"Invalid user_id: {user_id}")
         return False
@@ -571,7 +571,7 @@ def save_user_data(user_id: int, data: Dict[str, Any], data_dir: str = "/safe/da
         # Create directory if it doesn't exist
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
-        # ✅ Write to temporary file first (atomic operation)
+        # RECOMMENDED: Write to temporary file first (atomic operation)
         with tempfile.NamedTemporaryFile(
             mode='w',
             suffix='.tmp',
@@ -582,7 +582,7 @@ def save_user_data(user_id: int, data: Dict[str, Any], data_dir: str = "/safe/da
             json.dump(data, temp_file, indent=2, ensure_ascii=False)
             temp_filepath = temp_file.name
 
-        # ✅ Atomic rename (prevents corruption)
+        # RECOMMENDED: Atomic rename (prevents corruption)
         os.rename(temp_filepath, filepath)
         logging.info(f"User data saved: {user_id}")
         return True
@@ -594,7 +594,7 @@ def save_user_data(user_id: int, data: Dict[str, Any], data_dir: str = "/safe/da
             os.remove(temp_filepath)
         return False
 
-# 🔒 Safe file path validation
+# SECURITY: Safe file path validation
 def validate_file_path(user_path: str, allowed_dir: str) -> Optional[Path]:
     """Validate file path to prevent directory traversal attacks."""
     try:
@@ -613,7 +613,7 @@ def validate_file_path(user_path: str, allowed_dir: str) -> Optional[Path]:
         logging.error(f"Invalid path: {user_path} - {e}")
         return None
 
-# 💡 SECURITY BEST PRACTICES:
+# TIP: SECURITY BEST PRACTICES:
 # - Always validate file paths for directory traversal
 # - Check file sizes to prevent DoS attacks
 # - Use atomic writes to prevent corruption
@@ -630,7 +630,7 @@ import pandas as pd
 from typing import Generator, List, Dict, Any, Iterator
 import logging
 
-# ✅ Memory-efficient CSV processing for large files
+# RECOMMENDED: Memory-efficient CSV processing for large files
 def process_large_csv(filepath: str) -> Generator[Dict[str, str], None, None]:
     """Process CSV file line by line to avoid memory issues."""
     try:
@@ -671,7 +671,7 @@ def validate_csv_row(row: Dict[str, str]) -> bool:
 
     return True
 
-# ✅ For large datasets, use pandas with chunking
+# RECOMMENDED: For large datasets, use pandas with chunking
 def process_large_dataset(filepath: str, chunk_size: int = 10000) -> Iterator[pd.DataFrame]:
     """Process large CSV in chunks to manage memory."""
     try:
@@ -694,7 +694,7 @@ def process_large_dataset(filepath: str, chunk_size: int = 10000) -> Iterator[pd
     except Exception as e:
         logging.error(f"Failed to process dataset {filepath}: {e}")
 
-# ✅ Safe CSV writing with validation
+# RECOMMENDED: Safe CSV writing with validation
 def write_csv_safely(data: List[Dict[str, Any]], filepath: str) -> bool:
     """Write CSV with error handling and data validation."""
     if not data:
@@ -725,7 +725,7 @@ def write_csv_safely(data: List[Dict[str, Any]], filepath: str) -> bool:
         logging.error(f"Failed to write CSV {filepath}: {e}")
         return False
 
-# 💡 WHEN TO USE:
+# TIP: WHEN TO USE:
 # - Generators: Files larger than available RAM
 # - Pandas chunks: Complex data analysis on large datasets
 # - Validation: All external data sources
@@ -741,7 +741,7 @@ from typing import Any, Dict, Optional
 from datetime import datetime
 import logging
 
-# ✅ Safe JSON reading with validation
+# RECOMMENDED: Safe JSON reading with validation
 def read_json_safely(filepath: str, max_size_mb: int = 100) -> Optional[Dict[str, Any]]:
     """Read JSON file with size and content validation."""
     try:
@@ -767,7 +767,7 @@ def read_json_safely(filepath: str, max_size_mb: int = 100) -> Optional[Dict[str
         logging.error(f"Failed to read JSON {filepath}: {e}")
         return None
 
-# ✅ Safe JSON writing with custom encoder
+# RECOMMENDED: Safe JSON writing with custom encoder
 class SafeJSONEncoder(json.JSONEncoder):
     """Custom JSON encoder for common Python types."""
     def default(self, obj):
@@ -799,7 +799,7 @@ def write_json_safely(data: Any, filepath: str) -> bool:
         logging.error(f"Failed to write JSON {filepath}: {e}")
         return False
 
-# 🔒 Secure JSON parsing for external APIs
+# SECURITY: Secure JSON parsing for external APIs
 def parse_api_response(json_text: str, expected_fields: set) -> Optional[Dict[str, Any]]:
     """Parse JSON from external API with validation."""
     try:
@@ -823,7 +823,7 @@ def parse_api_response(json_text: str, expected_fields: set) -> Optional[Dict[st
         logging.error(f"Invalid JSON from API: {e}")
         return None
 
-# ✅ Streaming JSON for large files
+# RECOMMENDED: Streaming JSON for large files
 def stream_json_array(filepath: str) -> Generator[Dict[str, Any], None, None]:
     """Stream large JSON arrays without loading entire file."""
     import ijson  # pip install ijson
@@ -838,7 +838,7 @@ def stream_json_array(filepath: str) -> Generator[Dict[str, Any], None, None]:
     except Exception as e:
         logging.error(f"Failed to stream JSON {filepath}: {e}")
 
-# 💡 JSON BEST PRACTICES:
+# TIP: JSON BEST PRACTICES:
 # - Always validate structure of external JSON
 # - Use custom encoders for Python-specific types
 # - Check file sizes before loading
@@ -863,28 +863,28 @@ import itertools
 from typing import Iterator, List
 import logging
 
-# ⚡ MEMORY: Generator vs List comparison
+# PERFORMANCE: MEMORY: Generator vs List comparison
 def read_large_file_inefficient(filepath: str) -> List[str]:
-    """❌ Loads entire file into memory - can cause MemoryError."""
+    """AVOID: Loads entire file into memory - can cause MemoryError."""
     with open(filepath) as f:
         return [line.strip().upper() for line in f]  # All lines in memory
 
 def read_large_file_efficient(filepath: str) -> Iterator[str]:
-    """✅ Processes one line at a time - constant memory usage."""
+    """RECOMMENDED: Processes one line at a time - constant memory usage."""
     with open(filepath) as f:
         for line in f:
             yield line.strip().upper()  # One line at a time
 
-# ⚡ STRING: Efficient string concatenation
+# PERFORMANCE: STRING: Efficient string concatenation
 def build_report_slow(items: List[str]) -> str:
-    """❌ Slow: O(n²) time complexity due to string immutability."""
+    """AVOID: Slow: O(n²) time complexity due to string immutability."""
     result = ""
     for item in items:
         result += f"Item: {item}\\n"  # Creates new string each time
     return result
 
 def build_report_fast(items: List[str]) -> str:
-    """✅ Fast: O(n) time complexity using join."""
+    """RECOMMENDED: Fast: O(n) time complexity using join."""
     return "\\n".join(f"Item: {item}" for item in items)
 
 # 🔍 Memory monitoring decorator
@@ -908,7 +908,7 @@ def monitor_memory(func):
 def process_data(data: List[int]) -> List[int]:
     return [x * 2 for x in data if x > 0]
 
-# ⚡ ITERATION: Efficient data processing patterns
+# PERFORMANCE: ITERATION: Efficient data processing patterns
 def process_large_numbers_efficient(max_num: int) -> Iterator[int]:
     """Use generator to process large sequences efficiently."""
     for i in range(max_num):
@@ -925,7 +925,7 @@ def batch_process(items: List[Any], batch_size: int) -> Iterator[List[Any]]:
             break
         yield batch
 
-# 💡 MEMORY OPTIMIZATION STRATEGIES:
+# TIP: MEMORY OPTIMIZATION STRATEGIES:
 # - Use generators for one-time iteration
 # - Join strings instead of concatenating
 # - Process data in batches for large datasets
@@ -943,9 +943,9 @@ import heapq
 from typing import List, Dict, Set, Tuple
 import time
 
-# ⚡ MEMBERSHIP: Fast membership testing
+# PERFORMANCE: MEMBERSHIP: Fast membership testing
 def find_common_users_slow(list1: List[str], list2: List[str]) -> List[str]:
-    """❌ O(n*m) time complexity - avoid for large lists."""
+    """AVOID: O(n*m) time complexity - avoid for large lists."""
     common = []
     for user in list1:
         if user in list2:  # O(m) lookup in list
@@ -953,22 +953,22 @@ def find_common_users_slow(list1: List[str], list2: List[str]) -> List[str]:
     return common
 
 def find_common_users_fast(list1: List[str], list2: List[str]) -> Set[str]:
-    """✅ O(n+m) time complexity using set intersection."""
+    """RECOMMENDED: O(n+m) time complexity using set intersection."""
     return set(list1) & set(list2)  # Much faster for large datasets
 
-# ⚡ COUNTING: Efficient frequency analysis
+# PERFORMANCE: COUNTING: Efficient frequency analysis
 def count_words_slow(text: str) -> Dict[str, int]:
-    """❌ Manual counting - slower and more error-prone."""
+    """AVOID: Manual counting - slower and more error-prone."""
     word_count = {}
     for word in text.split():
         word_count[word] = word_count.get(word, 0) + 1
     return word_count
 
 def count_words_fast(text: str) -> Counter:
-    """✅ Use Counter for frequency counting."""
+    """RECOMMENDED: Use Counter for frequency counting."""
     return Counter(text.split())  # Optimized C implementation
 
-# ⚡ SEARCH: Binary search for sorted data
+# PERFORMANCE: SEARCH: Binary search for sorted data
 def find_score_range(scores: List[int], min_score: int, max_score: int) -> List[int]:
     """Efficiently find scores in range using binary search O(log n)."""
     if not scores:
@@ -979,7 +979,7 @@ def find_score_range(scores: List[int], min_score: int, max_score: int) -> List[
     end_idx = bisect.bisect_right(scores, max_score)
     return scores[start_idx:end_idx]
 
-# ⚡ TOP-K: Heap for top-K problems
+# PERFORMANCE: TOP-K: Heap for top-K problems
 def get_top_k_scores(scores: List[int], k: int) -> List[int]:
     """Efficiently get top K scores: O(n log k) vs O(n log n) for full sort."""
     if k >= len(scores):
@@ -990,7 +990,7 @@ def get_bottom_k_scores(scores: List[int], k: int) -> List[int]:
     """Get bottom K scores efficiently."""
     return heapq.nsmallest(k, scores)
 
-# ⚡ GROUPING: Efficient data grouping
+# PERFORMANCE: GROUPING: Efficient data grouping
 def group_users_by_department(users: List[Dict[str, str]]) -> Dict[str, List[str]]:
     """Group users efficiently using defaultdict."""
     groups = defaultdict(list)
@@ -998,7 +998,7 @@ def group_users_by_department(users: List[Dict[str, str]]) -> Dict[str, List[str
         groups[user['department']].append(user['name'])
     return dict(groups)
 
-# ⚡ DEQUE: Efficient queue operations
+# PERFORMANCE: DEQUE: Efficient queue operations
 def process_queue_efficient(tasks: List[str]) -> None:
     """Use deque for efficient queue operations O(1) vs O(n) for list."""
     task_queue = deque(tasks)
@@ -1026,7 +1026,7 @@ def time_it(func):
 def performance_critical_function(data: List[int]) -> int:
     return sum(x for x in data if x > 0)
 
-# 💡 PERFORMANCE GUIDELINES:
+# TIP: PERFORMANCE GUIDELINES:
 # - Profile before optimizing (measure, don't guess)
 # - Use set for membership testing (O(1) vs O(n))
 # - Use Counter for frequency counting
@@ -1053,7 +1053,7 @@ from unittest.mock import patch, Mock
 import pytest
 from typing import List, Optional
 
-# ✅ Testable function design
+# RECOMMENDED: Testable function design
 def calculate_user_score(user_actions: List[str], bonus_multiplier: float = 1.0) -> int:
     """Calculate user score with clear inputs and outputs."""
     if not user_actions:
@@ -1065,7 +1065,7 @@ def calculate_user_score(user_actions: List[str], bonus_multiplier: float = 1.0)
     base_score = len(user_actions) * 10
     return int(base_score * bonus_multiplier)
 
-# ✅ Comprehensive test cases
+# RECOMMENDED: Comprehensive test cases
 class TestUserScore(unittest.TestCase):
     """Test all edge cases and error conditions."""
 
@@ -1096,7 +1096,7 @@ class TestUserScore(unittest.TestCase):
         result = calculate_user_score(["action"], bonus_multiplier=0)
         self.assertEqual(result, 0)
 
-# ✅ Mocking external dependencies
+# RECOMMENDED: Mocking external dependencies
 def get_user_data(user_id: int) -> Optional[dict]:
     """Function that calls external API."""
     import requests
@@ -1130,7 +1130,7 @@ class TestUserData(unittest.TestCase):
         result = get_user_data(999)
         self.assertIsNone(result)
 
-# 💡 TESTING BEST PRACTICES:
+# TIP: TESTING BEST PRACTICES:
 # - Test edge cases (empty, null, boundary values)
 # - Test error conditions and exceptions
 # - Use mocks for external dependencies
@@ -1148,7 +1148,7 @@ import pdb
 from typing import Any, Dict
 import sys
 
-# ✅ Comprehensive logging setup
+# RECOMMENDED: Comprehensive logging setup
 def setup_logging():
     """Configure logging for debugging and production."""
     logging.basicConfig(
@@ -1160,7 +1160,7 @@ def setup_logging():
         ]
     )
 
-# ✅ Debugging with proper error context
+# RECOMMENDED: Debugging with proper error context
 def process_user_order(order_data: Dict[str, Any]) -> bool:
     """Process order with comprehensive error handling and logging."""
     logger = logging.getLogger(__name__)
@@ -1199,7 +1199,7 @@ def process_user_order(order_data: Dict[str, Any]) -> bool:
         logger.error(traceback.format_exc())
         return False
 
-# ✅ Debug decorator for function tracing
+# RECOMMENDED: Debug decorator for function tracing
 def debug_trace(func):
     """Decorator to trace function calls and returns."""
     def wrapper(*args, **kwargs):
@@ -1224,7 +1224,7 @@ def calculate_discount(price: float, discount_percent: float) -> float:
 
     return price * (discount_percent / 100)
 
-# ✅ Interactive debugging techniques
+# RECOMMENDED: Interactive debugging techniques
 def debug_function_with_breakpoint():
     """Example of using debugger breakpoint."""
     data = [1, 2, 3, 4, 5]
@@ -1235,7 +1235,7 @@ def debug_function_with_breakpoint():
     result = sum(x * 2 for x in data)
     return result
 
-# ✅ Assertion-based debugging
+# RECOMMENDED: Assertion-based debugging
 def validate_user_data(user_data: Dict[str, Any]) -> bool:
     """Use assertions for debugging and validation."""
     # Assertions help catch bugs during development
@@ -1246,7 +1246,7 @@ def validate_user_data(user_data: Dict[str, Any]) -> bool:
     # Additional validation...
     return True
 
-# 💡 DEBUGGING STRATEGIES:
+# TIP: DEBUGGING STRATEGIES:
 # - Use logging levels appropriately (DEBUG, INFO, WARNING, ERROR)
 # - Log inputs and outputs for complex functions
 # - Use assertions to catch bugs early in development

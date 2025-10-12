@@ -1,6 +1,6 @@
 "use client";
 
-import { Code, Database, FileCode2, Home, Zap } from "lucide-react";
+import { Code, Database, FileCode2, Home, Zap, Brain, Rocket } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -13,6 +13,8 @@ export default function Navigation() {
     { href: "/django", label: "Django", icon: Database },
     { href: "/typescript", label: "TypeScript", icon: FileCode2 },
     { href: "/nextjs", label: "Next.js", icon: Zap },
+    { href: "/openai", label: "OpenAI", icon: Brain },
+    { href: "/fastapi", label: "FastAPI", icon: Rocket },
   ];
 
   return (

@@ -16,6 +16,8 @@ export const pythonCheatSheet: CheatSheet = {
           description:
             "Type hints for maintainability • Helps catch bugs early • Required in teams • Prevents injection issues",
           language: "python",
+          difficulty: "intermediate",
+          tags: ["types", "best-practices", "maintainability"],
           code: `# Type hints for better code - ALWAYS use in production
 from typing import Optional, List, Dict, Union
 
@@ -49,6 +51,8 @@ def safe_age_check(age_input: str) -> bool:
           description:
             "Always sanitize user input • Prevent injection attacks • Use regex for validation • Escape HTML content",
           language: "python",
+          difficulty: "advanced",
+          tags: ["security", "validation", "sanitization", "xss-prevention"],
           code: `import re
 import html
 from typing import Optional
@@ -89,6 +93,8 @@ def safe_file_path(user_filename: str) -> Optional[str]:
           description:
             "Choose right numeric types • Understand precision limits • Use math module for accuracy • Profile numeric operations",
           language: "python",
+          difficulty: "beginner",
+          tags: ["basics", "math", "precision"],
           code: `import math
 import decimal
 from fractions import Fraction
@@ -140,6 +146,8 @@ def safe_divide(a: float, b: float) -> Optional[float]:
           description:
             "Lists: random access needed • Generators: memory efficiency • Sets: fast membership testing • Choose based on use case",
           language: "python",
+          difficulty: "intermediate",
+          tags: ["performance", "data-structures", "memory", "optimization"],
           code: `from typing import Iterator, List, Set
 import sys
 
@@ -182,6 +190,8 @@ unique_words = {word.lower() for word in text.split()}
           description:
             "Use .get() for optional keys • defaultdict for auto-creation • Validate external keys • Avoid KeyError exceptions",
           language: "python",
+          difficulty: "beginner",
+          tags: ["data-structures", "dictionaries", "best-practices"],
           code: `from collections import defaultdict, Counter
 from typing import Dict, Any, List
 
@@ -251,6 +261,8 @@ def safe_update_user(user_id: int, updates: Dict[str, Any]) -> bool:
           description:
             "Use guard clauses • Early returns • Avoid deep nesting • Clear error handling paths",
           language: "python",
+          difficulty: "intermediate",
+          tags: ["control-flow", "best-practices", "clean-code"],
           code: `# RECOMMENDED: Guard clauses - exit early for invalid conditions
 def process_user_order(user_id: int, items: List[str]) -> bool:
     # Guard clauses first
@@ -360,6 +372,8 @@ first_few = list(itertools.islice(even_squares, 5))  # Take only what you need
           description:
             "Pure functions preferred • Avoid mutable defaults • Single responsibility • Clear error handling",
           language: "python",
+          difficulty: "advanced",
+          tags: ["functions", "best-practices", "clean-code", "patterns"],
           code: `from typing import List, Optional, Callable, Union
 from functools import wraps
 import logging
@@ -517,6 +531,8 @@ def update_user_safely(user_id: int, data: dict) -> bool:
           description:
             "Always validate file paths • Check permissions • Handle encoding • Limit file sizes • Use atomic writes",
           language: "python",
+          difficulty: "advanced",
+          tags: ["file-io", "security", "validation", "error-handling"],
           code: `import os
 import json
 import tempfile
@@ -858,6 +874,8 @@ def stream_json_array(filepath: str) -> Generator[Dict[str, Any], None, None]:
           description:
             "Use generators for large data • Profile memory usage • Avoid creating unnecessary objects • Monitor resource usage",
           language: "python",
+          difficulty: "expert",
+          tags: ["performance", "memory", "optimization", "generators"],
           code: `import sys
 import itertools
 from typing import Iterator, List
@@ -1048,6 +1066,8 @@ def performance_critical_function(data: List[int]) -> int:
           description:
             "Test edge cases • Use proper assertions • Mock external dependencies • Test error conditions",
           language: "python",
+          difficulty: "intermediate",
+          tags: ["testing", "debugging", "best-practices", "quality"],
           code: `import unittest
 from unittest.mock import patch, Mock
 import pytest

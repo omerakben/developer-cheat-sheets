@@ -16,6 +16,8 @@ export const openaiCheatSheet: CheatSheet = {
           description:
             "Configure API key for all platforms • Secure environment variable setup",
           language: "bash",
+          difficulty: "beginner",
+          tags: ["setup", "authentication", "security", "api-keys"],
           code: `# macOS / Linux
 export OPENAI_API_KEY="sk-proj-..."
 
@@ -31,6 +33,8 @@ setx OPENAI_API_KEY "sk-proj-..."
           description:
             "Install SDK and make your first API call • Automatic authentication",
           language: "python",
+          difficulty: "beginner",
+          tags: ["python", "sdk", "chat", "getting-started"],
           code: `# Installation: pip install openai
 from openai import OpenAI
 

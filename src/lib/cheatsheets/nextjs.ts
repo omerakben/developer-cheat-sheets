@@ -14,6 +14,8 @@ export const nextjsCheatSheet: CheatSheet = {
           title: "File-based Routing Structure",
           description: "App Router directory structure and file conventions",
           language: "bash",
+          difficulty: "beginner",
+          tags: ["routing", "app-router", "basics", "structure"],
           code: `app/
 ├── layout.tsx          # Root layout (required)
 ├── page.tsx           # Home page (/)
@@ -47,6 +49,8 @@ export const nextjsCheatSheet: CheatSheet = {
           title: "Root Layout",
           description: "Creating the root layout with metadata and providers",
           language: "tsx",
+          difficulty: "intermediate",
+          tags: ["layout", "metadata", "server-components"],
           code: `// app/layout.tsx
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';

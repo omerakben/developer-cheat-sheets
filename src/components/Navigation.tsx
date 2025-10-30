@@ -2,19 +2,23 @@
 
 import { useTheme } from "@/contexts/ThemeContext";
 import {
+  Atom,
+  Bookmark,
   Brain,
   Code,
+  Container,
   Database,
   FileCode2,
+  GitBranch,
   Github,
   Home,
   Menu,
   Moon,
+  Regex,
   Rocket,
   Sun,
   X,
   Zap,
-  Bookmark,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,12 +31,16 @@ export default function Navigation() {
 
   const navItems = [
     { href: "/", label: "Home", icon: Home },
+    { href: "/git", label: "Git", icon: GitBranch },
+    { href: "/docker", label: "Docker", icon: Container },
+    { href: "/react", label: "React", icon: Atom },
     { href: "/python", label: "Python", icon: Code },
-    { href: "/django", label: "Django", icon: Database },
     { href: "/typescript", label: "TypeScript", icon: FileCode2 },
     { href: "/nextjs", label: "Next.js", icon: Zap },
-    { href: "/openai", label: "OpenAI", icon: Brain },
+    { href: "/django", label: "Django", icon: Database },
     { href: "/fastapi", label: "FastAPI", icon: Rocket },
+    { href: "/openai", label: "OpenAI", icon: Brain },
+    { href: "/regex", label: "Regex", icon: Regex },
   ];
 
   return (

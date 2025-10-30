@@ -1,12 +1,16 @@
 import {
   ArrowRight,
+  Atom,
   Bookmark,
   Brain,
   Code,
+  Container,
   Copy,
   Database,
   Filter,
+  GitBranch,
   Layers,
+  Regex as RegexIcon,
   Rocket,
   Search,
   Sparkles,
@@ -18,20 +22,36 @@ import Link from "next/link";
 export default function Home() {
   const cheatsheets = [
     {
+      href: "/git",
+      title: "Git",
+      icon: GitBranch,
+      color: "orange",
+      description:
+        "Version control mastery: commits, branches, rebasing, and collaboration",
+    },
+    {
+      href: "/docker",
+      title: "Docker",
+      icon: Container,
+      color: "blue",
+      description:
+        "Containerization: builds, compose, multi-stage, and best practices",
+    },
+    {
+      href: "/react",
+      title: "React",
+      icon: Atom,
+      color: "cyan",
+      description:
+        "Modern hooks, performance, custom hooks, and advanced patterns",
+    },
+    {
       href: "/python",
       title: "Python",
       icon: Code,
-      color: "blue",
+      color: "yellow",
       description:
         "Variables, data types, control flow, functions, classes, and more",
-    },
-    {
-      href: "/django",
-      title: "Django",
-      icon: Database,
-      color: "green",
-      description:
-        "Models, views, templates, authentication, and REST API patterns",
     },
     {
       href: "/typescript",
@@ -45,9 +65,24 @@ export default function Home() {
       href: "/nextjs",
       title: "Next.js",
       icon: Layers,
-      color: "gray",
+      color: "black",
       description:
         "App Router, Server Components, data fetching, and deployment",
+    },
+    {
+      href: "/django",
+      title: "Django",
+      icon: Database,
+      color: "green",
+      description:
+        "Models, views, templates, authentication, and REST API patterns",
+    },
+    {
+      href: "/fastapi",
+      title: "FastAPI",
+      icon: Rocket,
+      color: "teal",
+      description: "Path operations, validation, security, and deployment",
     },
     {
       href: "/openai",
@@ -57,11 +92,12 @@ export default function Home() {
       description: "Chat completions, function calling, assistants, and more",
     },
     {
-      href: "/fastapi",
-      title: "FastAPI",
-      icon: Rocket,
-      color: "teal",
-      description: "Path operations, validation, security, and deployment",
+      href: "/regex",
+      title: "Regex",
+      icon: RegexIcon,
+      color: "red",
+      description:
+        "Pattern matching, validation, and extraction made simple",
     },
   ];
 
@@ -120,7 +156,7 @@ export default function Home() {
             <div className="inline-flex items-center px-4 py-2 mb-6 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
               <Sparkles className="w-4 h-4 text-yellow-300 mr-2" />
               <span className="text-sm text-white font-medium">
-                6 Comprehensive Cheat Sheets
+                10 Comprehensive Cheat Sheets
               </span>
             </div>
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">

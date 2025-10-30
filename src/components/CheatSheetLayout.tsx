@@ -1,8 +1,9 @@
 "use client";
 
-import { CheatSheet, DifficultyLevel } from "@/types/cheatsheet";
+import { CheatSheet, CodeExample, DifficultyLevel } from "@/types/cheatsheet";
+import Fuse from "fuse.js";
 import { Filter, Search, X } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import CodeBlock from "./CodeBlock";
 
 interface CheatSheetLayoutProps {
@@ -20,33 +21,93 @@ export default function CheatSheetLayout({
     useState<DifficultyLevel | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  const filteredSections = cheatSheet.sections
-    .map((section) => {
-      const filteredExamples = section.examples.filter((example) => {
-        const matchesSearch =
-          searchTerm === "" ||
-          example.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          example.description
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          example.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (example.tags &&
-            example.tags.some((tag) =>
-              tag.toLowerCase().includes(searchTerm.toLowerCase())
-            ));
+  // Create Fuse.js search index with all examples
+  const searchableData = useMemo(() => {
+    const data: Array<{
+      sectionId: string;
+      sectionTitle: string;
+      example: CodeExample;
+    }> = [];
 
-        const matchesDifficulty =
-          !selectedDifficulty || example.difficulty === selectedDifficulty;
-
-        return matchesSearch && matchesDifficulty;
+    cheatSheet.sections.forEach((section) => {
+      section.examples.forEach((example) => {
+        data.push({
+          sectionId: section.id,
+          sectionTitle: section.title,
+          example,
+        });
       });
+    });
 
-      return {
-        ...section,
-        examples: filteredExamples,
-      };
-    })
-    .filter((section) => section.examples.length > 0);
+    return data;
+  }, [cheatSheet]);
+
+  // Configure Fuse.js for fuzzy search
+  const fuse = useMemo(() => {
+    return new Fuse(searchableData, {
+      keys: [
+        { name: "example.title", weight: 0.4 }, // Title most important
+        { name: "example.description", weight: 0.3 },
+        { name: "example.tags", weight: 0.2 },
+        { name: "example.code", weight: 0.1 }, // Code least important
+        { name: "sectionTitle", weight: 0.15 },
+      ],
+      threshold: 0.4, // 0 = perfect match, 1 = match anything
+      distance: 100,
+      minMatchCharLength: 2,
+      includeScore: true,
+      useExtendedSearch: true,
+    });
+  }, [searchableData]);
+
+  // Perform fuzzy search
+  const searchResults = useMemo(() => {
+    if (!searchTerm.trim()) return searchableData;
+
+    const results = fuse.search(searchTerm);
+    return results.map((result) => result.item);
+  }, [searchTerm, fuse, searchableData]);
+
+  // Filter by difficulty and organize into sections
+  const filteredSections = useMemo(() => {
+    const filteredData = searchResults.filter((item) => {
+      const matchesDifficulty =
+        !selectedDifficulty || item.example.difficulty === selectedDifficulty;
+      return matchesDifficulty;
+    });
+
+    // Group back into sections
+    const sectionMap = new Map<
+      string,
+      {
+        id: string;
+        title: string;
+        description: string;
+        examples: CodeExample[];
+      }
+    >();
+
+    filteredData.forEach((item) => {
+      if (!sectionMap.has(item.sectionId)) {
+        const originalSection = cheatSheet.sections.find(
+          (s) => s.id === item.sectionId
+        );
+        if (originalSection) {
+          sectionMap.set(item.sectionId, {
+            ...originalSection,
+            examples: [],
+          });
+        }
+      }
+
+      const section = sectionMap.get(item.sectionId);
+      if (section) {
+        section.examples.push(item.example);
+      }
+    });
+
+    return Array.from(sectionMap.values());
+  }, [searchResults, selectedDifficulty, cheatSheet.sections]);
 
   const clearSearch = () => {
     setSearchTerm("");

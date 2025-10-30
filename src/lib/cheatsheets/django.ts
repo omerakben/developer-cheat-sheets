@@ -14,6 +14,8 @@ export const djangoCheatSheet: CheatSheet = {
           title: "Create New Project",
           description: "Setting up a new Django project and app",
           language: "bash",
+          difficulty: "beginner",
+          tags: ["setup", "installation", "basics"],
           code: `# Install Django
 pip install django
 
@@ -38,6 +40,8 @@ python manage.py migrate`,
           title: "Settings Configuration",
           description: "Essential settings.py configurations",
           language: "python",
+          difficulty: "intermediate",
+          tags: ["configuration", "settings", "security"],
           code: `# settings.py
 import os
 from pathlib import Path

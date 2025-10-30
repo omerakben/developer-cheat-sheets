@@ -16,6 +16,8 @@ export const fastapiCheatSheet: CheatSheet = {
           description:
             "Install FastAPI and Uvicorn • Create minimal working application",
           language: "python",
+          difficulty: "beginner",
+          tags: ["setup", "basics", "installation", "getting-started"],
           code: `# Installation
 # pip install fastapi uvicorn[standard]
 
@@ -40,6 +42,8 @@ async def read_item(item_id: int):
           description:
             "Configure FastAPI with metadata • Custom OpenAPI docs • CORS setup",
           language: "python",
+          difficulty: "intermediate",
+          tags: ["configuration", "cors", "middleware", "setup"],
           code: `from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

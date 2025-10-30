@@ -16,6 +16,8 @@ export const typescriptCheatSheet: CheatSheet = {
           description:
             "Strong typing for maintainability • Runtime validation prevents errors • Essential for production • Prevents injection attacks",
           language: "typescript",
+          difficulty: "intermediate",
+          tags: ["types", "validation", "security", "runtime-checks"],
           code: `// RECOMMENDED: Strong typing with validation - ALWAYS use in production
 interface User {
   readonly id: number;
@@ -275,6 +277,8 @@ function validateRange(value: number, min: number, max: number): boolean {
           description:
             "Arrays: ordered access needed • Sets: fast membership testing • Maps: key-value performance • Choose based on use case",
           language: "typescript",
+          difficulty: "intermediate",
+          tags: ["data-structures", "performance", "collections"],
           code: `// PERFORMANCE: PERFORMANCE: Choose the right data structure
 
 // RECOMMENDED: Arrays: Use for ordered data and frequent access by index
@@ -2211,6 +2215,8 @@ const componentCache = new WeakCache<HTMLElement, ComponentData>();
           description:
             "Custom utility types • Type transformations • Template literal magic • Conditional types",
           language: "typescript",
+          difficulty: "expert",
+          tags: ["advanced", "utility-types", "generics", "type-system"],
           code: `// RECOMMENDED: Advanced utility types for API design
 type StrictOmit<T, K extends keyof T> = Omit<T, K>;
 type StrictPick<T, K extends keyof T> = Pick<T, K>;

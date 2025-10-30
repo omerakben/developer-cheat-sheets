@@ -8,7 +8,7 @@
 
 > **A comprehensive collection of developer cheat sheets with copy-paste ready code examples**
 
-Your go-to resource for quick reference guides covering Python, Django, TypeScript, Next.js, FastAPI, OpenAI, and more. Built for developers who value speed, clarity, and best practices.
+Your go-to resource for quick reference guides covering Git, Docker, React, Python, Django, TypeScript, Next.js, FastAPI, OpenAI, Regex, and more. Built for developers who value speed, clarity, and best practices.
 
 **[Live Demo](https://developer-cheat-sheets.vercel.app)** • **[Portfolio](https://omerakben.com)** • **[Report Bug](https://github.com/omerakben/developer-cheat-sheets/issues)** • **[Request Feature](https://github.com/omerakben/developer-cheat-sheets/issues)**
 
@@ -38,24 +38,26 @@ As developers, we constantly Google the same patterns, syntax, and examples. Thi
 
 ### Current Features
 
-- **6 Comprehensive Cheat Sheets**: Python, Django, TypeScript, Next.js, FastAPI, OpenAI
-- **Instant Search**: Find code snippets across all cheat sheets
+- **10 Comprehensive Cheat Sheets**: Git, Docker, React, Regex, Python, Django, TypeScript, Next.js, FastAPI, OpenAI
+- **Fuzzy Search**: Intelligent typo-tolerant search with Fuse.js - finds examples even with misspellings
+- **Difficulty Level Filtering**: Filter examples from beginner to expert level
+- **Tag-Based Navigation**: Browse examples by tags (security, performance, validation, etc.)
+- **Bookmark System**: Save your favorite code snippets for quick access
+- **Dark/Light Mode**: Toggle between themes with system preference detection
 - **Copy to Clipboard**: One-click code copying with visual feedback
-- **Syntax Highlighting**: Professional code presentation
-- **Responsive Design**: Works perfectly on desktop and mobile
-- **Keyboard Shortcuts**: Navigate and search with keyboard
-- **Dark Mode**: Easy on the eyes
-- **Fast Loading**: Optimized for performance
+- **Syntax Highlighting**: Professional code presentation with language support
+- **Documentation Links**: Direct links to official docs for each example
+- **Responsive Design**: Works perfectly on desktop, tablet, and mobile
+- **Fast Loading**: Optimized with Next.js 15 and React Server Components
 
 ### Coming Soon
 
-- Difficulty level filtering (Basic → Expert)
-- Bookmark system for favorite snippets
 - Share specific code snippets via URL
-- Dark/Light mode toggle
-- More cheat sheets (React, Docker, Git, SQL)
-- Interactive code playground
-- Community contributions
+- Interactive code playground with live execution
+- Community contributions and voting
+- VS Code extension
+- Offline support (PWA)
+- More cheat sheets (SQL, MongoDB, AWS, Kubernetes)
 
 ---
 
@@ -67,6 +69,7 @@ This project leverages modern web technologies:
 - **UI**: [React 19](https://reactjs.org/) with Server Components
 - **Language**: [TypeScript](https://www.typescriptlang.org/) (strict mode)
 - **Styling**: [Tailwind CSS 4.0](https://tailwindcss.com/)
+- **Search**: [Fuse.js](https://fusejs.io/) for fuzzy search
 - **Syntax Highlighting**: [react-syntax-highlighter](https://github.com/react-syntax-highlighter/react-syntax-highlighter)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Deployment**: [Vercel](https://vercel.com/)
@@ -127,7 +130,12 @@ developer-cheat-sheets/
 ├── src/
 │   ├── app/                  # Next.js App Router pages
 │   │   ├── page.tsx          # Homepage
-│   │   ├── layout.tsx        # Root layout
+│   │   ├── layout.tsx        # Root layout with providers
+│   │   ├── bookmarks/        # Bookmarks page
+│   │   ├── git/              # Git cheat sheet page
+│   │   ├── docker/           # Docker cheat sheet page
+│   │   ├── react/            # React cheat sheet page
+│   │   ├── regex/            # Regex cheat sheet page
 │   │   ├── python/           # Python cheat sheet page
 │   │   ├── django/           # Django cheat sheet page
 │   │   ├── typescript/       # TypeScript cheat sheet page
@@ -135,11 +143,19 @@ developer-cheat-sheets/
 │   │   ├── fastapi/          # FastAPI cheat sheet page
 │   │   └── openai/           # OpenAI cheat sheet page
 │   ├── components/           # React components
-│   │   ├── Navigation.tsx    # Top navigation bar
-│   │   ├── CheatSheetLayout.tsx  # Cheat sheet template
-│   │   └── CodeBlock.tsx     # Code snippet display
+│   │   ├── Navigation.tsx    # Top navigation with theme toggle
+│   │   ├── Footer.tsx        # Footer with social links
+│   │   ├── CheatSheetLayout.tsx  # Cheat sheet template with fuzzy search
+│   │   └── CodeBlock.tsx     # Code snippet with bookmarks
+│   ├── contexts/             # React contexts
+│   │   ├── ThemeContext.tsx  # Dark/Light mode state
+│   │   └── BookmarkContext.tsx  # Bookmark state management
 │   ├── lib/
 │   │   └── cheatsheets/      # Cheat sheet data
+│   │       ├── git.ts        # 30+ Git examples
+│   │       ├── docker.ts     # 25+ Docker examples
+│   │       ├── react.ts      # 20+ React hooks examples
+│   │       ├── regex.ts      # 15+ Regex patterns
 │   │       ├── python.ts
 │   │       ├── django.ts
 │   │       ├── typescript.ts
@@ -157,6 +173,60 @@ developer-cheat-sheets/
 ---
 
 ## Available Cheat Sheets
+
+### Git
+
+Essential Git version control reference:
+- Repository setup and configuration
+- Basic workflow (add, commit, push, pull)
+- Branching strategies and merging
+- Remote repository management
+- Undoing changes safely
+- Stashing and cleaning
+- Conflict resolution
+- Advanced techniques (rebase, cherry-pick, submodules)
+
+**[View Git Cheat Sheet →](/git)**
+
+### Docker
+
+Complete Docker containerization guide:
+- Container basics and lifecycle
+- Image building and optimization
+- Docker Compose orchestration
+- Volume and data management
+- Networking patterns
+- Multi-stage builds
+- Troubleshooting and debugging
+- Security best practices
+
+**[View Docker Cheat Sheet →](/docker)**
+
+### React
+
+React hooks and patterns reference:
+- Basic hooks (useState, useEffect, useContext)
+- Performance hooks (useMemo, useCallback, useTransition)
+- Advanced hooks (useReducer, useRef, useImperativeHandle)
+- Custom hooks for reusable logic
+- Component patterns and composition
+- Error boundaries and Suspense
+- Testing patterns
+
+**[View React Cheat Sheet →](/react)**
+
+### Regex
+
+Regular expressions patterns and usage:
+- Basic syntax and metacharacters
+- Character classes and quantifiers
+- Anchors and boundaries
+- Groups and capturing
+- Lookahead and lookbehind assertions
+- Common validation patterns
+- Practical JavaScript integration
+
+**[View Regex Cheat Sheet →](/regex)**
 
 ### Python
 
@@ -241,12 +311,28 @@ Complete OpenAI API guide:
 
 ## Usage
 
-### Search Functionality
+### Fuzzy Search
 
-Press `/` to focus the search bar, then type to filter examples across sections. The search covers:
-- Section titles
-- Example descriptions
-- Code content
+The intelligent search powered by Fuse.js is typo-tolerant and searches across multiple fields:
+- **Title** (highest priority) - example names
+- **Description** - what the code does
+- **Tags** - categorization like "security", "performance"
+- **Code** - actual code content
+- **Section titles** - major categories
+
+Just start typing, and relevant examples appear even with typos (e.g., "docker compse" finds "docker compose").
+
+### Difficulty Filtering
+
+Click the "Filters" button to filter examples by difficulty level:
+- **Beginner**: Getting started examples
+- **Intermediate**: Common use cases
+- **Advanced**: Complex patterns
+- **Expert**: Production optimizations
+
+### Bookmarking
+
+Click the bookmark icon on any code example to save it for later. Access all your bookmarks from the navigation menu.
 
 ### Keyboard Shortcuts
 
@@ -289,16 +375,25 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
 
 ## Roadmap
 
-- [ ] Add difficulty level filtering
-- [ ] Implement bookmark system
-- [ ] Add more cheat sheets (React, Docker, Git, SQL, MongoDB, AWS)
-- [ ] Dark/Light mode toggle
-- [ ] Interactive code playground
+### Completed ✓
+- [x] Add difficulty level filtering
+- [x] Implement bookmark system
+- [x] Add Git, Docker, React, and Regex cheat sheets
+- [x] Dark/Light mode toggle
+- [x] Fuzzy search with typo tolerance
+
+### In Progress
+- [ ] Add more cheat sheets (SQL, MongoDB, AWS, Kubernetes)
 - [ ] Share specific snippets via URL
-- [ ] Community contribution system
+- [ ] Interactive code playground with live execution
+
+### Future
+- [ ] Community contribution system with voting
 - [ ] Mobile app (React Native)
 - [ ] Offline support (PWA)
 - [ ] VS Code extension
+- [ ] AI-powered code suggestions
+- [ ] Multi-language support
 
 ---
 

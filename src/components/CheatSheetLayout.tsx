@@ -1,71 +1,157 @@
 "use client";
 
-import { CheatSheet } from "@/types/cheatsheet";
-import { Search, X } from "lucide-react";
+import { CheatSheet, DifficultyLevel } from "@/types/cheatsheet";
+import { Filter, Search, X } from "lucide-react";
 import { useState } from "react";
 import CodeBlock from "./CodeBlock";
 
 interface CheatSheetLayoutProps {
   cheatSheet: CheatSheet;
+  cheatSheetId: string;
 }
 
 export default function CheatSheetLayout({
   cheatSheet,
+  cheatSheetId,
 }: CheatSheetLayoutProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [selectedDifficulty, setSelectedDifficulty] =
+    useState<DifficultyLevel | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
 
-  const filteredSections = cheatSheet.sections.filter(
-    (section) =>
-      section.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      section.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      section.examples.some(
-        (example) =>
+  const filteredSections = cheatSheet.sections
+    .map((section) => {
+      const filteredExamples = section.examples.filter((example) => {
+        const matchesSearch =
+          searchTerm === "" ||
           example.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           example.description
             .toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
-          example.code.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-  );
+          example.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (example.tags &&
+            example.tags.some((tag) =>
+              tag.toLowerCase().includes(searchTerm.toLowerCase())
+            ));
+
+        const matchesDifficulty =
+          !selectedDifficulty || example.difficulty === selectedDifficulty;
+
+        return matchesSearch && matchesDifficulty;
+      });
+
+      return {
+        ...section,
+        examples: filteredExamples,
+      };
+    })
+    .filter((section) => section.examples.length > 0);
 
   const clearSearch = () => {
     setSearchTerm("");
   };
 
+  const clearFilters = () => {
+    setSelectedDifficulty(null);
+    setSearchTerm("");
+  };
+
+  const difficulties: DifficultyLevel[] = [
+    "beginner",
+    "intermediate",
+    "advanced",
+    "expert",
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
       {/* Header */}
-      <div className="bg-gray-900 border-b border-gray-800 sticky top-0 z-20">
+      <div className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-16 z-20">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex flex-col gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-white">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {cheatSheet.title}
               </h1>
-              <p className="text-gray-400 mt-1">{cheatSheet.description}</p>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                {cheatSheet.description}
+              </p>
             </div>
 
-            {/* Search */}
-            <div className="relative max-w-md w-full lg:w-96">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search cheat sheets..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-              {searchTerm && (
-                <button
-                  onClick={clearSearch}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
-                  title="Clear search"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
+            {/* Search and Filter */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search examples..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={clearSearch}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    title="Clear search"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                <Filter className="w-5 h-5" />
+                <span>Filters</span>
+                {selectedDifficulty && (
+                  <span className="ml-1 px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 rounded-full">
+                    1
+                  </span>
+                )}
+              </button>
             </div>
+
+            {/* Filter Panel */}
+            {showFilters && (
+              <div className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                    Difficulty Level
+                  </h3>
+                  {selectedDifficulty && (
+                    <button
+                      onClick={clearFilters}
+                      className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      Clear filters
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {difficulties.map((difficulty) => (
+                    <button
+                      key={difficulty}
+                      onClick={() =>
+                        setSelectedDifficulty(
+                          selectedDifficulty === difficulty ? null : difficulty
+                        )
+                      }
+                      className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                        selectedDifficulty === difficulty
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                      }`}
+                    >
+                      {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -73,8 +159,10 @@ export default function CheatSheetLayout({
       <div className="max-w-7xl mx-auto px-4 py-8 flex gap-8">
         {/* Sidebar Navigation */}
         <div className="hidden lg:block w-64 flex-shrink-0">
-          <div className="sticky top-40">
-            <h2 className="text-lg font-semibold text-white mb-4">Sections</h2>
+          <div className="sticky top-60">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Sections
+            </h2>
             <nav className="space-y-2">
               {filteredSections.map((section) => (
                 <button
@@ -87,10 +175,13 @@ export default function CheatSheetLayout({
                   className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
                     activeSection === section.id
                       ? "bg-blue-600 text-white"
-                      : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                 >
                   {section.title}
+                  <span className="ml-2 text-xs opacity-75">
+                    ({section.examples.length})
+                  </span>
                 </button>
               ))}
             </nav>
@@ -99,11 +190,18 @@ export default function CheatSheetLayout({
 
         {/* Main Content */}
         <div className="flex-1 min-w-0">
-          {searchTerm && (
-            <div className="mb-6 p-4 bg-gray-800 rounded-lg border border-gray-700">
-              <p className="text-gray-300">
-                Found {filteredSections.length} section(s) matching &ldquo;
-                {searchTerm}&rdquo;
+          {(searchTerm || selectedDifficulty) && (
+            <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-gray-700 dark:text-gray-300">
+                Found{" "}
+                {filteredSections.reduce(
+                  (acc, section) => acc + section.examples.length,
+                  0
+                )}{" "}
+                example(s)
+                {searchTerm && ` matching "${searchTerm}"`}
+                {selectedDifficulty &&
+                  ` with ${selectedDifficulty} difficulty`}
               </p>
             </div>
           )}
@@ -116,10 +214,12 @@ export default function CheatSheetLayout({
                 className="scroll-mt-32"
               >
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-white mb-2">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                     {section.title}
                   </h2>
-                  <p className="text-gray-400">{section.description}</p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {section.description}
+                  </p>
                 </div>
 
                 <div className="space-y-6">
@@ -130,6 +230,11 @@ export default function CheatSheetLayout({
                       description={example.description}
                       code={example.code}
                       language={example.language}
+                      difficulty={example.difficulty}
+                      tags={example.tags}
+                      documentationUrl={example.documentationUrl}
+                      cheatSheetId={cheatSheetId}
+                      sectionId={section.id}
                     />
                   ))}
                 </div>
@@ -137,16 +242,19 @@ export default function CheatSheetLayout({
             ))}
           </div>
 
-          {filteredSections.length === 0 && searchTerm && (
+          {filteredSections.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-400 text-lg">
-                No results found for &ldquo;{searchTerm}&rdquo;
+              <p className="text-gray-600 dark:text-gray-400 text-lg mb-2">
+                No examples found
+              </p>
+              <p className="text-gray-500 dark:text-gray-500 text-sm mb-4">
+                Try adjusting your search or filters
               </p>
               <button
-                onClick={clearSearch}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                onClick={clearFilters}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
               >
-                Clear search
+                Clear all filters
               </button>
             </div>
           )}
